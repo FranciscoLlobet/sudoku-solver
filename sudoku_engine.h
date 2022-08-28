@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "sudoku.h"
+
 enum Sudoku_RC_E
 {
     SUDOKU_RC_ERROR = -1,
@@ -54,7 +56,7 @@ enum Sudoku_RC_E PrunePuzzle(SudokuPuzzle_P p);
 int pruneCandidates(SudokuPuzzle_P p);
 
 
-int Solve(SudokuPuzzle_P p, int level);
+enum Sudoku_RC_E Solve(SudokuPuzzle_P p, int level);
 
 
 #ifdef __cplusplus

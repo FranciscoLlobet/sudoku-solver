@@ -1,10 +1,13 @@
 #include "sudoku.h"
 #include "sudoku_engine.h"
 
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+
 /* Get a Sudoku Malloc Instance */
 SudokuPuzzle_P Sudoku_MallocPuzzle(void)
 {
-    printf("alloc: %d\n\r", sizeof(struct SudokuPuzzle_S));
     return (SudokuPuzzle_P)malloc(sizeof(struct SudokuPuzzle_S));
 }
 
@@ -85,4 +88,27 @@ int Sudoku_PrintPuzzle(SudokuPuzzle_P p)
     printf("-------------------\n");
 
     return ret;
+}
+
+void Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array)
+{
+
+    for (unsigned int row = 0; row < NUM_ROWS; row++)
+    {
+        for (unsigned int col = 0; col < NUM_COLS; col++)
+        {
+            char char_value[2];
+
+            strncpy(char_value, sudoku_array + row * 9 + col, 1);
+
+            if (isdigit(char_value[0]))
+            {
+                int val = atoi(char_value);
+                if(val != 0) 
+                {
+                    Sudoku_SetValue(p, row, col, val);
+                }
+            }
+        }
+    }
 }

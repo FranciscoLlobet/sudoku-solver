@@ -9,10 +9,13 @@
 #include "sudoku_engine.h"
 
 const char * sudokuTestArrays[] = {
-    "974236158638591742125487936316754289742918563589362417867125394253649871491873625",
-    "2564891733746159829817234565932748617128.6549468591327635147298127958634849362715",
-    "3.542.81.4879.15.6.29.5637485.793.416132.8957.74.6528.2413.9.655.867.192.965124.8",
-    "..2.3...8.....8....31.2.....6..5.27..1.....5.2.4.6..31....8.6.5.......13..531.4.."
+    "974236158638591742125487936316754289742918563589362417867125394253649871491873625", /* Array 0 */
+    "2564891733746159829817234565932748617128.6549468591327635147298127958634849362715", /* Array 1 */
+    "3.542.81.4879.15.6.29.5637485.793.416132.8957.74.6528.2413.9.655.867.192.965124.8", /* Array 2 */
+    "..2.3...8.....8....31.2.....6..5.27..1.....5.2.4.6..31....8.6.5.......13..531.4..", /* Array 3*/
+    "11...............................................................................", /* Array 4 */
+    "1........1.......................................................................", /* Array 5 */
+    "1.........1.........1............................................................", /* Array 6 */
 };
 
 void TEST_InitializeTestPuzzle(SudokuPuzzle_P puzzle)
@@ -52,26 +55,6 @@ void TEST_InitializeTestPuzzle(SudokuPuzzle_P puzzle)
     Sudoku_SetValue(puzzle, 8, 7, 7);
 }
 
-void TEST_InitializeSudokuFromArray(SudokuPuzzle_P p, const char * sudoku_array)
-{
-
-    for (unsigned int row = 0; row < NUM_ROWS; row++)
-    {
-        for (unsigned int col = 0; col < NUM_COLS; col++)
-        {
-            char char_value[2];
-
-            strncpy(char_value, sudoku_array + row*9 + col, 1);
-
-            if (isdigit(char_value[0]))
-            {
-                int val = atoi(char_value);
-                Sudoku_SetValue(p, row, col, val);
-            }
-        }
-    }
-}
-
 TEST_CASE("Test Initialization")
 {
     int rc = 0;
@@ -107,13 +90,12 @@ TEST_CASE("Test Completed Solution")
 
     CHECK((SudokuPuzzle_P)NULL != p);
 
-    Sudoku_InitializePuzzle(p);
+    TEST_InitializeTestPuzzle(p);
 
-    TEST_InitializeSudokuFromArray(p, sudokuTestArrays[0]);
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[0]);
 
     rc = Sudoku_Solve((SudokuPuzzle_P)p);
 
-    //Sudoku_PrintPuzzle(p);
     CHECK((int)0 == rc);
 
     Sudoku_FreePuzzle(p);
@@ -129,11 +111,10 @@ TEST_CASE("Last Empty Square")
 
     Sudoku_InitializePuzzle(p);
 
-    TEST_InitializeSudokuFromArray(p, sudokuTestArrays[1]);
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[1]);
 
     rc = Sudoku_Solve((SudokuPuzzle_P)p);
 
-    Sudoku_PrintPuzzle(p);
     CHECK((int)0 == rc);
 
     Sudoku_FreePuzzle(p);
@@ -149,11 +130,10 @@ TEST_CASE("Naked Singles")
 
     Sudoku_InitializePuzzle(p);
 
-    TEST_InitializeSudokuFromArray(p, sudokuTestArrays[2]);
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[2]);
 
     rc = Sudoku_Solve((SudokuPuzzle_P)p);
 
-    Sudoku_PrintPuzzle(p);
     CHECK((int)0 == rc);
 
     Sudoku_FreePuzzle(p);
@@ -169,12 +149,95 @@ TEST_CASE("Hidden Singles")
 
     Sudoku_InitializePuzzle(p);
 
-    TEST_InitializeSudokuFromArray(p, sudokuTestArrays[3]);
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[3]);
 
     rc = Sudoku_Solve((SudokuPuzzle_P)p);
 
-    Sudoku_PrintPuzzle(p);
     CHECK((int)0 == rc);
 
     Sudoku_FreePuzzle(p);
+}
+
+TEST_CASE("Row Conflict")
+{
+    int rc = 0;
+
+    SudokuPuzzle_P p = Sudoku_MallocPuzzle();
+
+    CHECK((SudokuPuzzle_P)NULL != p);
+
+    Sudoku_InitializePuzzle(p);
+
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[4]);
+
+    rc = Sudoku_Solve((SudokuPuzzle_P)p);
+
+    CHECK((int)SUDOKU_RC_ERROR == rc);
+
+    Sudoku_FreePuzzle(p);
+}
+
+TEST_CASE("Column Conflict")
+{
+    int rc = 0;
+
+    SudokuPuzzle_P p = Sudoku_MallocPuzzle();
+
+    CHECK((SudokuPuzzle_P)NULL != p);
+
+    Sudoku_InitializePuzzle(p);
+
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[5]);
+
+    rc = Sudoku_Solve((SudokuPuzzle_P)p);
+
+    CHECK((int)SUDOKU_RC_ERROR == rc);
+
+    Sudoku_FreePuzzle(p);
+}
+
+TEST_CASE("Subrgid Conflict")
+{
+    int rc = 0;
+
+    SudokuPuzzle_P p = Sudoku_MallocPuzzle();
+
+    CHECK((SudokuPuzzle_P)NULL != p);
+
+    Sudoku_InitializePuzzle(p);
+
+    Sudoku_InitializeFromArray(p, sudokuTestArrays[6]);
+
+    rc = Sudoku_Solve((SudokuPuzzle_P)p);
+
+    CHECK((int)SUDOKU_RC_ERROR == rc);
+
+    Sudoku_FreePuzzle(p);
+}
+
+TEST_CASE("Row Prune")
+{
+    //Sudoku_RC_E rc = SUDOKU_RC_SUCCESS;
+    int rc = 0;
+    struct SudokuPuzzle_S p;
+    Sudoku_InitializePuzzle( (SudokuPuzzle_P)&p);
+    Sudoku_InitializeFromArray((SudokuPuzzle_P)&p, sudokuTestArrays[4]);
+
+    rc = pruneCandidates(&p);
+
+    CHECK(-1 == rc);
+}
+
+TEST_CASE("Prune Isses")
+{
+    Sudoku_RC_E rc = SUDOKU_RC_ERROR;
+
+    struct SudokuPuzzle_S p;
+    Sudoku_InitializePuzzle( (SudokuPuzzle_P)&p);
+
+    Sudoku_InitializeFromArray((SudokuPuzzle_P)&p, sudokuTestArrays[6]);
+
+    rc = PrunePuzzle((SudokuPuzzle_P)&p);
+
+    CHECK(SUDOKU_RC_ERROR == rc);
 }

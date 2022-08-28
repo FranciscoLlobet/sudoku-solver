@@ -80,8 +80,8 @@ typedef struct SudokuPuzzle_S * SudokuPuzzle_P;
 #define SUDOKU_MASK_ALL  ((uint32_t)(SUDOKU_MASK_1 | SUDOKU_MASK_2 | SUDOKU_MASK_3 | SUDOKU_MASK_4 | SUDOKU_MASK_5 | SUDOKU_MASK_6 | SUDOKU_MASK_7 | SUDOKU_MASK_8 | SUDOKU_MASK_9))
 
 
-
 int Sudoku_InitializePuzzle(SudokuPuzzle_P p);
+void Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array);
 int Sudoku_SetValue(SudokuPuzzle_P p, unsigned int row, unsigned int col, int val);
 int Sudoku_GetValue(SudokuPuzzle_P p, unsigned int row, unsigned int col);
 int Sudoku_GetNumCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col);
