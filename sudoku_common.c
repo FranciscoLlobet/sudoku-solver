@@ -21,30 +21,34 @@ SudokuPuzzle_P Sudoku_CopyPuzzle(SudokuPuzzle_P destination, SudokuPuzzle_P sour
     return (SudokuPuzzle_P)memmove(destination, source, sizeof(struct SudokuPuzzle_S));
 }
 
-int Sudoku_InitializePuzzle(SudokuPuzzle_P p)
+Sudoku_RC_T Sudoku_InitializePuzzle(SudokuPuzzle_P p)
 {
-    return (int)InitializePuzzle(p);
+    return InitializePuzzle(p);
 }
 
-int Sudoku_SetValue(SudokuPuzzle_P p, unsigned int row, unsigned int col, int val)
+
+Sudoku_Values_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, unsigned int val)
 {
-    return (int)SetCellValueInPuzzle(p, (enum SudokuValues_E)val, row, col);
+    return SetValue(p, (Sudoku_Values_T)val, row, col);
 }
 
-int Sudoku_GetValue(SudokuPuzzle_P p, unsigned int row, unsigned int col)
+unsigned int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
-    return (int)GetCellValueInPuzzle(p, row, col);
+    return (unsigned int)GetValue(p, row, col);
 }
+
 
 int Sudoku_GetNumCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col)
 {
     return GetCandidatesInCell(p, row, col);
 }
 
+
 int Sudoku_Solve(SudokuPuzzle_P p)
 {
     return Solve(p, 0);
 }
+
 
 int Sudoku_PrintPuzzle(SudokuPuzzle_P p)
 {
@@ -99,7 +103,7 @@ void Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array)
         {
             char char_value[2];
 
-            strncpy(char_value, sudoku_array + row * 9 + col, 1);
+            strncpy_s(char_value, sizeof(char_value), sudoku_array + row * 9 + col, 1);
 
             if (isdigit(char_value[0]))
             {

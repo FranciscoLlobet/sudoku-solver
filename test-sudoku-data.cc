@@ -25,7 +25,6 @@ TEST_CASE("Test")
       
         if (81 == data_array.length())
         {
-            //Sudoku_InitializeFromArray(p, (const char *)&data_array[0]);
             Sudoku_InitializePuzzle(p);
             Sudoku_InitializeFromArray(p, data_array.c_str());
             int rc = Sudoku_Solve(p);
