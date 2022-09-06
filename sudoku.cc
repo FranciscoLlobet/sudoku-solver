@@ -186,19 +186,20 @@ TEST_CASE("Hello")
     d.Print();
 }
 
+#define MAX_LINES   40000
+
 TEST_CASE("FileTest")
 {
 
     ifstream test_data_file;
 
-    test_data_file.open("sudoku17.txt");
+    test_data_file.open("../sudoku17.txt");
 
     string data_array;
+    size_t count = 0;
 
-    for (unsigned int i = 0; i < 10000; i++)
+    while(getline(test_data_file, data_array))
     {
-        getline(test_data_file, data_array);
-      
         if (81 == data_array.length())
         {
             SudokuPuzzle p(data_array);
@@ -206,8 +207,10 @@ TEST_CASE("FileTest")
             int rc = p.Solve();
 
             CHECK(0 == rc);
+            count++;
         }
     }
 
     test_data_file.close();
+    cout << count << endl;
 }

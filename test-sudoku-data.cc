@@ -14,12 +14,12 @@ TEST_CASE("Test")
 
     ifstream test_data_file;
 
-    test_data_file.open("sudoku17.txt");
+    test_data_file.open("../sudoku17.txt");
 
     SudokuPuzzle_P p = Sudoku_MallocPuzzle();
     string data_array;
 
-    for (unsigned int i = 0; i < 200; i++)
+    for (unsigned int i = 0; i < 1000; i++)
     {
         getline(test_data_file, data_array);
       
