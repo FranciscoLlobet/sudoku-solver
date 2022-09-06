@@ -3,51 +3,11 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
+
+#include "sudoku.hh"
 
 using namespace std;
-
-#include "sudoku_engine.h"
-
 #include "test_sudoku.hh"
-
-class SudokuPuzzle
-{
-public:
-    /* Constructor options */
-    SudokuPuzzle(void);
-    SudokuPuzzle(string p);
-
-    // Manipulation functions
-    Sudoku_RC_T InitializePuzzle(void);             
-    Sudoku_RC_T InitializePuzzle(string p);  
-    Sudoku_RC_T Print(void); 
-    Sudoku_Values_T SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
-    Sudoku_Values_T GetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
-
-    Sudoku_RC_T Solve(void); // Solve this puzzle
-private:
-    SudokuPuzzle(SudokuPuzzle_P p); /* Create Puzzle Object from control struct */
-    Sudoku_RC_T InitializePuzzle(SudokuPuzzle_P p); // Initialize using C-Style
-    Sudoku_RC_T Solve(unsigned int level); // Recursive Level info
-
-    // Structs
-    struct SudokuPuzzle_S puzzle;
-
-    // friend class SudokuSolver;
-};
-
-/* Create CPP based solver */
-class SudokuSolver
-{
-public:
-    Sudoku_RC_T Solve(void);
-    Sudoku_RC_T Solve(SudokuPuzzle &p);                     // Solve this puzzle
-    Sudoku_RC_T Solve(SudokuPuzzle &p, unsigned int level); // Recursive Level info
-    Sudoku_RC_T Prune(void);                                // Solve this puzzle
-};
-
-#include "sudoku_engine.h"
 
 SudokuPuzzle::SudokuPuzzle(void)
 {
