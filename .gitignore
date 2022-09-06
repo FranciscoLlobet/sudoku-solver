@@ -54,6 +54,8 @@ dkms.conf
 #build 
 build
 CMakeFiles
+docs/html
+docs/latex
 
 #vscode settings
 .vscode
