@@ -40,7 +40,7 @@ unsigned int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Co
 
 int Sudoku_GetNumCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col)
 {
-    return GetCandidatesInCell(p, row, col);
+    return CountCandidates(p, row, col);
 }
 
 
@@ -103,7 +103,7 @@ void Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array)
         {
             char char_value[2];
 
-            strncpy_s(char_value, sizeof(char_value), sudoku_array + row * 9 + col, 1);
+            (void)strncpy_s(char_value, sizeof(char_value), sudoku_array + row * NUM_COLS + col, 1);
 
             if (isdigit(char_value[0]))
             {

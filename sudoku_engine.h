@@ -20,10 +20,7 @@ struct SudokuCell_S
 {
     int value;
     enum CellType_E cell_type;
-    uint32_t bit_value;     // Value as Bitmask (?)
     uint32_t candidates;    // Candidate Bitmask
-    uint32_t n_candidate;   // Number of candidates
-    uint32_t score;         // Score
 };
 
 struct SudokuPuzzle_S
@@ -54,7 +51,7 @@ enum Sudoku_RC_E validateGrid(SudokuPuzzle_P p);
 
 
 
-int GetCandidatesInCell(SudokuPuzzle_P p, unsigned int row, unsigned int col);
+int CountCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col);
 
 enum Sudoku_RC_E PrunePuzzle(SudokuPuzzle_P p);
 int pruneCandidates(SudokuPuzzle_P p);

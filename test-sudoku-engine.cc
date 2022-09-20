@@ -41,7 +41,7 @@ TEST_CASE("Correct Row. Now Candidates left")
 
     CHECK(SUDOKU_RC_PRUNE == rc);
 
-    uint32_t mask = getCellMask(getRowReference(&p, 0));
+    uint32_t mask = getCellMask(getRowReference(&p, 0, 0));
 
     CHECK(mask == 0);
 
@@ -71,7 +71,7 @@ TEST_CASE("Correct Row. One Candidates left")
 
     CHECK(SUDOKU_RC_PRUNE == rc);
 
-    uint32_t mask = getCellMask(getRowReference(&p, 0));
+    uint32_t mask = getCellMask(getRowReference(&p, 0, 0));
 
     CHECK(mask == SUDOKU_MASK_5);
 
@@ -95,7 +95,7 @@ TEST_CASE("Row Conflict")
 
     CHECK(SUDOKU_RC_ERROR == rc);
 
-    uint32_t mask = getCellMask(getRowReference(&p, 0));
+    uint32_t mask = getCellMask(getRowReference(&p, 0, 0));
 
     CHECK(mask == 0);
 }
@@ -114,7 +114,7 @@ TEST_CASE("Column Conflict")
 
     CHECK(SUDOKU_RC_ERROR == rc);
 
-    uint32_t mask = getCellMask(getColumnReference(&p, col));
+    uint32_t mask = getCellMask(getColumnReference(&p, 0, col));
 
     CHECK(mask == 0);
 }
@@ -140,7 +140,7 @@ TEST_CASE("Correct Column. Now Candidates left")
 
     CHECK(SUDOKU_RC_PRUNE == rc);
 
-    uint32_t mask = getCellMask(getColumnReference(&p, col));
+    uint32_t mask = getCellMask(getColumnReference(&p, 0, col));
 
     CHECK(mask == 0);
 

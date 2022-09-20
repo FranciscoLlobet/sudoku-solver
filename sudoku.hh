@@ -7,8 +7,16 @@
 class SudokuPuzzle
 {
 public:
-    /* Constructor options */
+    /**
+     * @brief Construct a new and empty Sudoku Puzzle object
+     */
     SudokuPuzzle(void);
+
+    /**
+     * @brief Construct a new Sudoku Puzzle object using string notation
+     * 
+     * @param p : Sudoku Puzzle in string notation
+     */
     SudokuPuzzle(std::string p);
 
     // Manipulation functions
@@ -86,12 +94,12 @@ private:
 
     /**
      * @brief Sudoku Puzzle struct
-     *
      */
     struct SudokuPuzzle_S puzzle;
 };
 
-using namespace std;
+
+
 
 /* Create CPP based solver */
 class SudokuSolver

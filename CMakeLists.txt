@@ -23,12 +23,11 @@ target_link_libraries(test-sudoku-library PUBLIC sudoku-engine)
 target_link_libraries(test-sudoku-data PUBLIC sudoku-engine)
 target_link_libraries(test-sudoku PUBLIC sudoku-engine)
 
-
-
 add_test(NAME sudoku-engine-test COMMAND test-sudoku-library)
 add_test(NAME sudoku-solver-test COMMAND test-sudoku-engine)
 add_test(NAME sudoku-data-test COMMAND test-sudoku-data)
 add_test(NAME sudoku COMMAND test-sudoku)
+
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

@@ -11,7 +11,7 @@ using namespace std;
 
 SudokuPuzzle::SudokuPuzzle(void)
 {
-    (void)this->InitializePuzzle(); // Default constructor
+    (void)this->InitializePuzzle();
 }
 
 SudokuPuzzle::SudokuPuzzle(string p)
@@ -97,8 +97,11 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
 
             rc = p_new->Solve(level + 1);
 
+            
+
             if (SUDOKU_RC_SUCCESS == rc)
             {
+                /* Overwrite current puzzle */
                 this->InitializePuzzle(&(p_new->puzzle));
             }
             else if (SUDOKU_RC_ERROR == rc)

@@ -1,5 +1,7 @@
 #include "sudoku_engine.h"
 
+
+#if 0
 /* Get References */
 static SudokuCell_P getCellReference(SudokuPuzzle_P puzzle, unsigned int row, unsigned int col);
 static SudokuCell_P getRowReference(SudokuPuzzle_P puzzle, unsigned int row);
@@ -37,27 +39,60 @@ static int countCandidatesInMask(uint32_t mask);
 
 /* Get value from mask */
 static enum SudokuValues_E getValueFromMask(uint32_t cell_mask);
+#endif
 
-/* Get the Cell Reference */
-static inline SudokuCell_P getCellReference(SudokuPuzzle_P puzzle, unsigned int row, unsigned int col)
+
+
+
+
+
+    /* ********************************************************************** */
+    /* Reference getters **************************************************** */
+    /* ********************************************************************** */
+
+
+
+static SudokuCell_P getCellReference(SudokuPuzzle_P puzzle, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
     return &(puzzle->grid[row][col]);
 }
 
-static inline SudokuCell_P getRowReference(SudokuPuzzle_P puzzle, unsigned int row)
+static SudokuCell_P getRowReference(SudokuPuzzle_P puzzle, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
+    (void)col;
     return &(puzzle->row[row]);
 }
 
-static inline SudokuCell_P getColumnReference(SudokuPuzzle_P puzzle, unsigned int col)
+static SudokuCell_P getColumnReference(SudokuPuzzle_P puzzle, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
+    (void)row;
     return &(puzzle->col[col]);
 }
 
-static inline SudokuCell_P getSubgridReference(SudokuPuzzle_P puzzle, unsigned int sub_row, unsigned int sub_col)
+static SudokuCell_P getSubgridReference(SudokuPuzzle_P puzzle, Sudoku_Row_Index_T sub_row, Sudoku_Column_Index_T sub_col)
 {
     return &(puzzle->sub[sub_row][sub_col]);
 }
+
+
+
+static inline void setCellMask(SudokuCell_P cell, uint32_t mask)
+{
+    cell->candidates = (mask & SUDOKU_MASK_ALL);
+}
+
+static inline uint32_t getCellMask(SudokuCell_P cell)
+{
+    return cell->candidates;
+}
+
+static uint32_t getMaskFromValue(int val)
+{
+    return (1 << (val - 1));
+}
+
+
+
 
 /* Set a Cell Value. */
 static enum SudokuValues_E setCellValue(SudokuCell_P cell, enum SudokuValues_E val)
@@ -71,10 +106,8 @@ static enum SudokuValues_E setCellValue(SudokuCell_P cell, enum SudokuValues_E v
     if (SUDOKU_NO_VALUE != val)
     {
         cell->value = (int)val;
-        cell->bit_value = getMaskFromValue(val);
         cell->cell_type = CELL_TYPE_SIMPLE_CELL;
         cell->candidates = SUDOKU_MASK_NONE;
-        cell->n_candidate = SUDOKU_NO_VALUE;
         ret = val;
     }
 
@@ -92,15 +125,9 @@ static int countCandidatesInMask(uint32_t mask)
     return count;
 }
 
-static enum Sudoku_RC_E setCellMask(SudokuCell_P cell, uint32_t mask)
-{
-    cell->candidates = (mask & SUDOKU_MASK_ALL);
-    cell->n_candidate = countCandidatesInMask(mask);
 
-    return SUDOKU_RC_SUCCESS;
-}
 
-int GetCandidatesInCell(SudokuPuzzle_P p, unsigned int row, unsigned int col)
+int CountCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col)
 {
     return countCandidatesInMask(getCellMask(getCellReference(p, row, col)));
 }
@@ -170,10 +197,7 @@ enum Sudoku_RC_E validateGrid(SudokuPuzzle_P p)
     return ret;
 }
 
-static uint32_t getCellMask(SudokuCell_P cell)
-{
-    return cell->candidates;
-}
+
 
 static enum SudokuValues_E getCellValue(SudokuCell_P cell)
 {
@@ -185,7 +209,6 @@ static enum Sudoku_RC_E initializeCell(SudokuCell_P cell, enum CellType_E cell_t
     cell->value = SUDOKU_NO_VALUE;
     cell->cell_type = cell_type;
     cell->candidates = SUDOKU_MASK_ALL;
-    cell->n_candidate = NUM_CANDIDATES;
 
     return SUDOKU_RC_SUCCESS;
 }
@@ -213,11 +236,11 @@ static enum Sudoku_RC_E initializeGrid(SudokuPuzzle_P puzzle)
 
 static enum Sudoku_RC_E initializeRows(SudokuPuzzle_P puzzle)
 {
-    enum Sudoku_RC_E ret = SUDOKU_RC_SUCCESS;
+    enum Sudoku_RC_E ret = SUDOKU_RC_ERROR;
 
     for (unsigned int r = 0; r < NUM_ROWS; r++)
     {
-        ret = initializeCell(getRowReference(puzzle, r), CELL_TYPE_ROW);
+        ret = initializeCell(getRowReference(puzzle, r, 0), CELL_TYPE_ROW);
         if (ret != SUDOKU_RC_SUCCESS)
             break;
     }
@@ -227,11 +250,11 @@ static enum Sudoku_RC_E initializeRows(SudokuPuzzle_P puzzle)
 
 static enum Sudoku_RC_E initializeColumns(SudokuPuzzle_P puzzle)
 {
-    enum Sudoku_RC_E ret = SUDOKU_RC_SUCCESS;
+    enum Sudoku_RC_E ret = SUDOKU_RC_ERROR;
 
     for (unsigned int c = 0; c < NUM_COLS; c++)
     {
-        ret = initializeCell(getColumnReference(puzzle, c), CELL_TYPE_COL);
+        ret = initializeCell(getColumnReference(puzzle, 0, c), CELL_TYPE_COL);
         if (ret != SUDOKU_RC_SUCCESS)
             break;
     }
@@ -241,10 +264,7 @@ static enum Sudoku_RC_E initializeColumns(SudokuPuzzle_P puzzle)
 
 static enum Sudoku_RC_E initializeSubgrid(SudokuPuzzle_P puzzle)
 {
-    enum Sudoku_RC_E ret = SUDOKU_RC_SUCCESS;
-
-    if (NULL == puzzle)
-        return SUDOKU_RC_ERROR;
+    enum Sudoku_RC_E ret = SUDOKU_RC_ERROR;
 
     /* Initialize Cell Grid */
     for (unsigned int i = 0; i < NUM_SUBGRID_ROWS; i++)
@@ -297,10 +317,11 @@ enum SudokuValues_E SetValue(SudokuPuzzle_P puzzle, enum SudokuValues_E val, Sud
     return setCellValue(getCellReference(puzzle, row, col), val);
 }
 
+
 /* Generate the row mask */
 static enum Sudoku_RC_E generateRowMask(SudokuPuzzle_P puzzle, unsigned int row)
 {
-    uint32_t current_mask = getCellMask(getRowReference(puzzle, row));
+    uint32_t current_mask = getCellMask(getRowReference(puzzle, row, 0));
     uint32_t new_mask = SUDOKU_MASK_NONE;     /* Row Mask Candidate. We start with empty mask */
     enum Sudoku_RC_E ret = SUDOKU_RC_SUCCESS; /* No candidate */
 
@@ -328,13 +349,13 @@ static enum Sudoku_RC_E generateRowMask(SudokuPuzzle_P puzzle, unsigned int row)
     {
         if (current_mask != new_mask)
         {
-            (void)setCellMask(getRowReference(puzzle, row), new_mask);
+            setCellMask(getRowReference(puzzle, row, 0), new_mask);
             ret = SUDOKU_RC_PRUNE;
         }
     }
     else
     {
-        (void)setCellMask(getRowReference(puzzle, row), SUDOKU_MASK_NONE);
+        setCellMask(getRowReference(puzzle, row, 0), SUDOKU_MASK_NONE);
     }
 
     return ret;
@@ -343,7 +364,7 @@ static enum Sudoku_RC_E generateRowMask(SudokuPuzzle_P puzzle, unsigned int row)
 /* Generate the column mask */
 static enum Sudoku_RC_E generateColumnMask(SudokuPuzzle_P puzzle, unsigned int col)
 {
-    uint32_t current_mask = getCellMask(getColumnReference(puzzle, col));
+    uint32_t current_mask = getCellMask(getColumnReference(puzzle, 0, col));
     uint32_t new_mask = SUDOKU_MASK_NONE;     /* Row Mask Candidate. We start with empty mask */
     enum Sudoku_RC_E ret = SUDOKU_RC_SUCCESS; /* No candidate */
 
@@ -371,13 +392,13 @@ static enum Sudoku_RC_E generateColumnMask(SudokuPuzzle_P puzzle, unsigned int c
     {
         if (current_mask != new_mask)
         {
-            (void)setCellMask(getColumnReference(puzzle, col), new_mask);
+            setCellMask(getColumnReference(puzzle, 0, col), new_mask);
             ret = SUDOKU_RC_PRUNE;
         }
     }
     else
     {
-        (void)setCellMask(getColumnReference(puzzle, col), SUDOKU_MASK_NONE);
+        setCellMask(getColumnReference(puzzle, 0, col), SUDOKU_MASK_NONE);
     }
 
     return ret;
@@ -416,13 +437,13 @@ static enum Sudoku_RC_E generateSubCellMask(SudokuPuzzle_P puzzle, int sub_row, 
     {
         if (current_mask != new_mask)
         {
-            (void)setCellMask(getSubgridReference(puzzle, sub_row, sub_col), new_mask);
+            setCellMask(getSubgridReference(puzzle, sub_row, sub_col), new_mask);
             ret = SUDOKU_RC_PRUNE;
         }
     }
     else
     {
-        (void)setCellMask(getSubgridReference(puzzle, sub_row, sub_col), SUDOKU_MASK_NONE);
+        setCellMask(getSubgridReference(puzzle, sub_row, sub_col), SUDOKU_MASK_NONE);
     }
 
     return ret;
@@ -496,8 +517,8 @@ static int updateGridMasks(SudokuPuzzle_P p)
             if (SUDOKU_NO_VALUE == GetValue(p, row, col))
             {
                 uint32_t old_mask = getCellMask(getCellReference(p, row, col));
-                uint32_t col_mask = getCellMask(getColumnReference(p, col));
-                uint32_t row_mask = getCellMask(getRowReference(p, row));
+                uint32_t col_mask = getCellMask(getColumnReference(p, 0, col));
+                uint32_t row_mask = getCellMask(getRowReference(p, row, 0));
                 uint32_t sub_mask = getCellMask(getSubgridReference(p, row / 3, col / 3));
 
                 uint32_t new_cell_mask = (col_mask & row_mask & sub_mask & old_mask);
@@ -582,10 +603,7 @@ static enum SudokuValues_E getFirstCandidate(uint32_t val)
     return ret;
 }
 
-static uint32_t getMaskFromValue(int val)
-{
-    return (1 << (val - 1));
-}
+
 
 static int updateMasks(SudokuPuzzle_P p)
 {
@@ -741,7 +759,7 @@ struct BackTrackCandidate_S SimpleSelectionStrategy(SudokuPuzzle_P p)
         {
             for (unsigned int col = 0; col < NUM_COLS; col++)
             {
-                if (n_cand == GetCandidatesInCell(p, row, col))
+                if (n_cand == CountCandidates(p, row, col))
                 {
 
                     cand.val = getFirstCandidate(getCellMask(getCellReference(p, row, col)));
