@@ -44,16 +44,17 @@ enum Sudoku_RC_E InitializePuzzle(SudokuPuzzle_P puzzle);
 enum SudokuValues_E SetValue(SudokuPuzzle_P puzzle, enum SudokuValues_E val, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
 enum SudokuValues_E GetValue(SudokuPuzzle_P puzzle, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
 
-
-
-
-enum Sudoku_RC_E validateGrid(SudokuPuzzle_P p);
-
-
-
 int CountCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col);
 
+/**
+ * @brief Prune and validate the grid
+ * 
+ * @param p 
+ * @return enum Sudoku_RC_E 
+ */
 enum Sudoku_RC_E PrunePuzzle(SudokuPuzzle_P p);
+
+
 int pruneCandidates(SudokuPuzzle_P p);
 
 struct BackTrackCandidate_S SimpleSelectionStrategy(SudokuPuzzle_P p);

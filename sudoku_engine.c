@@ -1,6 +1,5 @@
 #include "sudoku_engine.h"
 
-
 #if 0
 /* Get References */
 static SudokuCell_P getCellReference(SudokuPuzzle_P puzzle, unsigned int row, unsigned int col);
@@ -41,16 +40,9 @@ static int countCandidatesInMask(uint32_t mask);
 static enum SudokuValues_E getValueFromMask(uint32_t cell_mask);
 #endif
 
-
-
-
-
-
-    /* ********************************************************************** */
-    /* Reference getters **************************************************** */
-    /* ********************************************************************** */
-
-
+/* ********************************************************************** */
+/* Reference getters **************************************************** */
+/* ********************************************************************** */
 
 static SudokuCell_P getCellReference(SudokuPuzzle_P puzzle, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
@@ -74,8 +66,6 @@ static SudokuCell_P getSubgridReference(SudokuPuzzle_P puzzle, Sudoku_Row_Index_
     return &(puzzle->sub[sub_row][sub_col]);
 }
 
-
-
 static inline void setCellMask(SudokuCell_P cell, uint32_t mask)
 {
     cell->candidates = (mask & SUDOKU_MASK_ALL);
@@ -90,9 +80,6 @@ static uint32_t getMaskFromValue(int val)
 {
     return (1 << (val - 1));
 }
-
-
-
 
 /* Set a Cell Value. */
 static enum SudokuValues_E setCellValue(SudokuCell_P cell, enum SudokuValues_E val)
@@ -124,8 +111,6 @@ static int countCandidatesInMask(uint32_t mask)
     }
     return count;
 }
-
-
 
 int CountCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col)
 {
@@ -196,8 +181,6 @@ enum Sudoku_RC_E validateGrid(SudokuPuzzle_P p)
 
     return ret;
 }
-
-
 
 static enum SudokuValues_E getCellValue(SudokuCell_P cell)
 {
@@ -316,7 +299,6 @@ enum SudokuValues_E SetValue(SudokuPuzzle_P puzzle, enum SudokuValues_E val, Sud
 {
     return setCellValue(getCellReference(puzzle, row, col), val);
 }
-
 
 /* Generate the row mask */
 static enum Sudoku_RC_E generateRowMask(SudokuPuzzle_P puzzle, unsigned int row)
@@ -603,8 +585,6 @@ static enum SudokuValues_E getFirstCandidate(uint32_t val)
     return ret;
 }
 
-
-
 static int updateMasks(SudokuPuzzle_P p)
 {
     int row_changes = 0;
@@ -745,6 +725,11 @@ enum Sudoku_RC_E PrunePuzzle(SudokuPuzzle_P p)
         ret = SUDOKU_RC_SUCCESS;
     }
 
+    if (SUDOKU_RC_SUCCESS == ret)
+    {
+        ret = validateGrid(p);
+    }
+
     return ret;
 }
 
@@ -790,42 +775,29 @@ enum Sudoku_RC_E Solve(SudokuPuzzle_P p, int level)
     /* Perform Puzzle Pruning */
     rc = PrunePuzzle(p);
 
-    if (SUDOKU_RC_SUCCESS == rc)
+    while (rc == SUDOKU_RC_PRUNE)
     {
-        rc = validateGrid(p);
-    }
+        struct BackTrackCandidate_S cand = SimpleSelectionStrategy(p);
 
-    if (rc == SUDOKU_RC_PRUNE)
-    {
-        while (rc == SUDOKU_RC_PRUNE)
+        SudokuPuzzle_P p_cand = Sudoku_MallocPuzzle();
+        Sudoku_CopyPuzzle(p_cand, p);
+
+        Sudoku_SetValue(p_cand, cand.row, cand.col, cand.val);
+
+        rc = Solve(p_cand, level + 1);
+
+        if (SUDOKU_RC_SUCCESS == rc)
         {
-            /* Pruning did not work yet */
-            struct BackTrackCandidate_S cand = SimpleSelectionStrategy(p);
-
-            SudokuPuzzle_P p_cand = Sudoku_MallocPuzzle();
-            Sudoku_CopyPuzzle(p_cand, p);
-
-            Sudoku_SetValue(p_cand, cand.row, cand.col, cand.val);
-
-            rc = Solve(p_cand, level + 1);
-
-            if (SUDOKU_RC_SUCCESS == rc)
-            {
-                Sudoku_CopyPuzzle(p, p_cand);
-            }
-            else if (SUDOKU_RC_ERROR == rc)
-            {
-                RemoveCandidate(p, cand.row, cand.col, cand.val);
-                
-                rc = PrunePuzzle(p);
-                if (rc == SUDOKU_RC_SUCCESS)
-                {
-                    rc = validateGrid(p); // Prune
-                }
-            }
-
-            Sudoku_FreePuzzle(p_cand);
+            Sudoku_CopyPuzzle(p, p_cand);
         }
+        else if (SUDOKU_RC_ERROR == rc)
+        {
+            RemoveCandidate(p, cand.row, cand.col, cand.val);
+
+            rc = PrunePuzzle(p);
+        }
+
+        Sudoku_FreePuzzle(p_cand);
     }
 
     return rc;

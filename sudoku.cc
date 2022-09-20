@@ -9,6 +9,19 @@
 using namespace std;
 #include "test_sudoku.hh"
 
+static unsigned int max_level = 0;
+static unsigned int solve_calls = 0;
+
+unsigned int GetMaxLevel(void)
+{
+    return max_level;
+}
+
+unsigned int GetSolveCalls(void)
+{
+    return solve_calls;
+}
+
 SudokuPuzzle::SudokuPuzzle(void)
 {
     (void)this->InitializePuzzle();
@@ -55,14 +68,24 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle_P p)
 
     return SUDOKU_RC_SUCCESS;
 }
+
+Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle *p)
+{
+
+    *this = *p;
+
+    return SUDOKU_RC_SUCCESS;
+}
+
 Sudoku_RC_T SudokuPuzzle::Print(void)
 {
     return (Sudoku_RC_T)Sudoku_PrintPuzzle(&(this->puzzle));
 }
 
-Sudoku_Values_T SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val)
+SudokuPuzzle *SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val)
 {
-    return (Sudoku_Values_T)Sudoku_SetValue(&(this->puzzle), row, col, val);
+    (void)Sudoku_SetValue(&(this->puzzle), row, col, val);
+    return this;
 }
 
 Sudoku_Values_T SudokuPuzzle::GetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
@@ -70,7 +93,6 @@ Sudoku_Values_T SudokuPuzzle::GetValue(Sudoku_Row_Index_T row, Sudoku_Column_Ind
     return (Sudoku_Values_T)Sudoku_GetValue(&(this->puzzle), row, col);
 }
 
-/* Solve Object */
 Sudoku_RC_T SudokuPuzzle::Solve(void)
 {
     return Solve(0);
@@ -78,44 +100,32 @@ Sudoku_RC_T SudokuPuzzle::Solve(void)
 
 Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
 {
-    enum Sudoku_RC_E rc = PrunePuzzle(&(this->puzzle));
+    max_level = (level > max_level) ? level : max_level;
+    solve_calls++;
 
-    if (SUDOKU_RC_SUCCESS == rc)
-    {
-        rc = validateGrid(&(this->puzzle));
-    }
+    /* Prune and Validate Grid */
+    auto rc = PrunePuzzle(&(this->puzzle));
 
-    if (SUDOKU_RC_PRUNE == rc)
+    while (rc == SUDOKU_RC_PRUNE)
     {
-        while (rc == SUDOKU_RC_PRUNE)
+        auto cand = SimpleSelectionStrategy(&(this->puzzle));
+
+        auto p_new = new SudokuPuzzle(&(this->puzzle)); // Creates new puzzle
+
+        rc = (p_new->SetValue(cand.row, cand.col, cand.val))->Solve(level + 1);
+
+        if (SUDOKU_RC_SUCCESS == rc)
         {
-            auto cand = SimpleSelectionStrategy(&(this->puzzle));
-
-            auto p_new = new SudokuPuzzle(&(this->puzzle)); // Creates new puzzle
-
-            p_new->SetValue(cand.row, cand.col, cand.val);
-
-            rc = p_new->Solve(level + 1);
-
-            
-
-            if (SUDOKU_RC_SUCCESS == rc)
-            {
-                /* Overwrite current puzzle */
-                this->InitializePuzzle(&(p_new->puzzle));
-            }
-            else if (SUDOKU_RC_ERROR == rc)
-            {
-                RemoveCandidate(&(this->puzzle), cand.row, cand.col, cand.val);
-                rc = PrunePuzzle(&(this->puzzle));
-                if (SUDOKU_RC_SUCCESS == rc)
-                {
-                    rc = validateGrid(&(this->puzzle));
-                }
-            }
-
-            delete (p_new);
+            /* Overwrite current puzzle */
+            this->InitializePuzzle(p_new);
         }
+        else if (SUDOKU_RC_ERROR == rc)
+        {
+            RemoveCandidate(&(this->puzzle), cand.row, cand.col, cand.val);
+            rc = PrunePuzzle(&(this->puzzle));
+        }
+
+        delete (p_new);
     }
 
     return rc;
@@ -127,29 +137,31 @@ Sudoku_RC_T SudokuSolver::Solve(void)
     return SUDOKU_RC_SUCCESS;
 }
 
-TEST_CASE("Hello")
+TEST_CASE("Solvable Puzzles")
 {
     SudokuPuzzle a(sudokuTestStrings[0]);
     SudokuPuzzle b(sudokuTestStrings[1]);
     SudokuPuzzle c(sudokuTestStrings[2]);
     SudokuPuzzle d(sudokuTestStrings[3]);
-    SudokuPuzzle e(sudokuTestStrings[4]);
-    SudokuPuzzle f(sudokuTestStrings[5]);
-    SudokuPuzzle g(sudokuTestStrings[6]);
 
     CHECK(SUDOKU_RC_SUCCESS == a.Solve());
     CHECK(SUDOKU_RC_SUCCESS == b.Solve());
     CHECK(SUDOKU_RC_SUCCESS == c.Solve());
     CHECK(SUDOKU_RC_SUCCESS == d.Solve());
+}
+
+TEST_CASE("Unsolvable Puzzles")
+{
+    SudokuPuzzle e(sudokuTestStrings[4]);
+    SudokuPuzzle f(sudokuTestStrings[5]);
+    SudokuPuzzle g(sudokuTestStrings[6]);
 
     CHECK(SUDOKU_RC_ERROR == e.Solve());
     CHECK(SUDOKU_RC_ERROR == f.Solve());
     CHECK(SUDOKU_RC_ERROR == g.Solve());
-
-    d.Print();
 }
 
-#define MAX_LINES   40000
+#define MAX_LINES 40000
 
 TEST_CASE("FileTest")
 {
@@ -161,19 +173,17 @@ TEST_CASE("FileTest")
     string data_array;
     size_t count = 0;
 
-    while(getline(test_data_file, data_array))
+    while (getline(test_data_file, data_array))
     {
         if (81 == data_array.length())
         {
             SudokuPuzzle p(data_array);
-            
-            int rc = p.Solve();
 
-            CHECK(0 == rc);
+            CHECK(0 == p.Solve());
             count++;
         }
     }
 
     test_data_file.close();
-    cout << count << endl;
+    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << endl;
 }

@@ -49,9 +49,9 @@ public:
      * @param row
      * @param col
      * @param val
-     * @return Sudoku_Values_T
+     * @return SudokuPuzzle
      */
-    Sudoku_Values_T SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
+    SudokuPuzzle * SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
 
     /**
      * @brief Get the Value object
@@ -85,6 +85,14 @@ private:
     Sudoku_RC_T InitializePuzzle(SudokuPuzzle_P p);
 
     /**
+     * @brief Initialize Puzzle using Cxx object
+     * 
+     * @param p 
+     * @return Sudoku_RC_T 
+     */
+    Sudoku_RC_T InitializePuzzle(SudokuPuzzle * p);
+
+    /**
      * @brief Recursively solve puzzle object
      *
      * @param level : Level of recursion
@@ -99,7 +107,7 @@ private:
 };
 
 
-
+unsigned int GetMaxLevel(void);
 
 /* Create CPP based solver */
 class SudokuSolver
