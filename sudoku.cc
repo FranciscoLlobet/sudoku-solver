@@ -163,15 +163,17 @@ TEST_CASE("Unsolvable Puzzles")
 
 #define MAX_LINES 40000
 
-TEST_CASE("FileTest")
+
+tuple<unsigned int, unsigned int, unsigned int, unsigned int> run_file_test(string file_name)
 {
-
+    unsigned int success = 0;
+    unsigned int prune = 0;
+    unsigned int error = 0;
+    unsigned int count = 0;
     ifstream test_data_file;
-
-    test_data_file.open("../sudoku17.txt");
-
     string data_array;
-    size_t count = 0;
+    
+    test_data_file.open(file_name);
 
     while (getline(test_data_file, data_array))
     {
@@ -179,11 +181,126 @@ TEST_CASE("FileTest")
         {
             SudokuPuzzle p(data_array);
 
-            CHECK(0 == p.Solve());
+            auto rc = p.Solve();
+            switch (rc)
+            {
+            case SUDOKU_RC_SUCCESS:
+                success++;
+                break;
+            case SUDOKU_RC_PRUNE:
+                prune++;
+                break;
+            default:
+                error++;
+            }
             count++;
         }
     }
 
     test_data_file.close();
-    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << endl;
+
+    return make_tuple(success, prune, error, count);
+}
+
+
+/**
+ * @brief This Dataset tests (mostly) the pruning algorithm
+ *
+ * Basically one solve() call per puzzle
+ *
+ */
+TEST_CASE("Puzzle0 Test for pruning algorithm (100k)")
+{
+    string file_name = "../data/puzzles0_kaggle";
+    
+    auto[success, prune, error, count] = run_file_test(file_name);
+
+    CHECK(count == success);
+    CHECK(0 == error);
+    CHECK(0 == prune);
+    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
+    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
+
+    /* Reset max_level and solve calls */
+    max_level = 0;
+    solve_calls = 0;
+}
+
+/**
+ * @brief
+ *
+ * Current benchmark: 25 Solve Calls per puzzle
+ */
+TEST_CASE("Puzzle1 Test. 1M Sudoku Puzzles")
+{
+    string file_name = "../data/puzzles1_unbiased";
+    
+    auto[success, prune, error, count] = run_file_test(file_name);
+
+    CHECK(count == success);
+    CHECK(0 == error);
+    CHECK(0 == prune);
+    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
+    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
+
+    /* Reset max_level and solve calls */
+    max_level = 0;
+    solve_calls = 0;
+}
+
+
+
+TEST_CASE("Puzzle3 Test.")
+{
+    string file_name = "../data/puzzles3_magictour_top1465";
+    
+    auto[success, prune, error, count] = run_file_test(file_name);
+
+    CHECK(count == success);
+    CHECK(0 == error);
+    CHECK(0 == prune);
+    
+    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
+    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
+
+    /* Reset max_level and solve calls */
+    max_level = 0;
+    solve_calls = 0;
+}
+
+TEST_CASE("Puzzle6 Test.")
+{
+    string file_name = "../data/puzzles6_forum_hardest_1106";
+    
+    auto[success, prune, error, count] = run_file_test(file_name);
+
+    CHECK(count == success);
+    CHECK(0 == error);
+    CHECK(0 == prune);
+    
+    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
+    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
+
+    /* Reset max_level and solve calls */
+    max_level = 0;
+    solve_calls = 0;
+}
+
+
+TEST_CASE("Puzzle7 Test.")
+{
+    string file_name = "../data/puzzles7_serg_benchmark";
+    
+    auto[success, prune, error, count] = run_file_test(file_name);
+
+    CHECK(count == success);
+    CHECK(0 == error);
+    CHECK(0 == prune);
+    
+    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
+    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
+
+    /* Reset max_level and solve calls */
+    max_level = 0;
+    solve_calls = 0;
 }

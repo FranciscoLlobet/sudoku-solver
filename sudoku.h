@@ -33,6 +33,7 @@ extern "C"
 #define SUDOKU_MASK_8 ((uint32_t)(1 << 7))
 #define SUDOKU_MASK_9 ((uint32_t)(1 << 8))
 #define SUDOKU_MASK_ALL ((uint32_t)(SUDOKU_MASK_1 | SUDOKU_MASK_2 | SUDOKU_MASK_3 | SUDOKU_MASK_4 | SUDOKU_MASK_5 | SUDOKU_MASK_6 | SUDOKU_MASK_7 | SUDOKU_MASK_8 | SUDOKU_MASK_9))
+#define SUDOKU_MASK_INVALID    ((uint32_t)UINT32_MAX)
 
     /**
      * @brief Sudoku Cell Values.
@@ -56,6 +57,26 @@ extern "C"
         SUDOKU_INVALID_VALUE_10 = 10
     } Sudoku_Values_T;
 
+    /**
+     * @brief Bit Value Masks
+     *
+     */
+    typedef enum SudokuBitValues_E
+    {
+        SUDOKU_BIT_INVALID_VALUE = (int32_t)SUDOKU_MASK_INVALID, /* May resolve to -1 if signed */
+        SUDOKU_BIT_NO_VALUE = (int32_t)SUDOKU_MASK_NONE, /* Bit mask for no value */
+        SUDOKU_BIT_VALUE_1 = (int32_t)SUDOKU_MASK_1,
+        SUDOKU_BIT_VALUE_2 = (int32_t)SUDOKU_MASK_2,
+        SUDOKU_BIT_VALUE_3 = (int32_t)SUDOKU_MASK_3,
+        SUDOKU_BIT_VALUE_4 = (int32_t)SUDOKU_MASK_4,
+        SUDOKU_BIT_VALUE_5 = (int32_t)SUDOKU_MASK_5,
+        SUDOKU_BIT_VALUE_6 = (int32_t)SUDOKU_MASK_6,
+        SUDOKU_BIT_VALUE_7 = (int32_t)SUDOKU_MASK_7,
+        SUDOKU_BIT_VALUE_8 = (int32_t)SUDOKU_MASK_8,
+        SUDOKU_BIT_VALUE_9 = (int32_t)SUDOKU_MASK_9, 
+        SUDOKU_BIT_VALUE_ALL = (int32_t)SUDOKU_MASK_ALL /* 511 */
+    } Sudoku_BitValues_T;
+
     /// @brief Sudoku Return Code Enumeration.
     typedef enum Sudoku_RC_E
     {
@@ -71,8 +92,9 @@ extern "C"
     typedef unsigned int Sudoku_Column_Index_T;
 
     /**
-     * @brief
+     * @brief Sudoku Cell Object Reference
      *
+     * Forward declaration of the Sudoku Cell Object as C-Style opaque type
      */
     typedef struct SudokuCell_S *SudokuCell_P;
 

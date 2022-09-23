@@ -19,6 +19,7 @@ enum CellType_E
 struct SudokuCell_S
 {
     int value;
+    uint32_t value_mask;
     enum CellType_E cell_type;
     uint32_t candidates;    // Candidate Bitmask
 };
