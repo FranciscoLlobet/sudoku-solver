@@ -1,13 +1,16 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest/doctest/doctest.h"
-
-#include <fstream>
-#include <iostream>
-
+/**
+ * @file
+ * @author Francisco Llobet (llobetblandino@gmail.com)
+ * @brief Sudoku Solver C++ Library
+ * @version 0.1
+ * @date 2022-09-24
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "sudoku.hh"
 
 using namespace std;
-#include "test_sudoku.hh"
 
 static unsigned int max_level = 0;
 static unsigned int solve_calls = 0;
@@ -71,7 +74,6 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle_P p)
 
 Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle *p)
 {
-
     *this = *p;
 
     return SUDOKU_RC_SUCCESS;
@@ -131,39 +133,10 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
     return rc;
 }
 
-Sudoku_RC_T SudokuSolver::Solve(void)
-{
-    // Has to be rewritten for C++
-    return SUDOKU_RC_SUCCESS;
-}
 
-TEST_CASE("Solvable Puzzles")
-{
-    SudokuPuzzle a(sudokuTestStrings[0]);
-    SudokuPuzzle b(sudokuTestStrings[1]);
-    SudokuPuzzle c(sudokuTestStrings[2]);
-    SudokuPuzzle d(sudokuTestStrings[3]);
+#if 0
 
-    CHECK(SUDOKU_RC_SUCCESS == a.Solve());
-    CHECK(SUDOKU_RC_SUCCESS == b.Solve());
-    CHECK(SUDOKU_RC_SUCCESS == c.Solve());
-    CHECK(SUDOKU_RC_SUCCESS == d.Solve());
-}
-
-TEST_CASE("Unsolvable Puzzles")
-{
-    SudokuPuzzle e(sudokuTestStrings[4]);
-    SudokuPuzzle f(sudokuTestStrings[5]);
-    SudokuPuzzle g(sudokuTestStrings[6]);
-
-    CHECK(SUDOKU_RC_ERROR == e.Solve());
-    CHECK(SUDOKU_RC_ERROR == f.Solve());
-    CHECK(SUDOKU_RC_ERROR == g.Solve());
-}
-
-#define MAX_LINES 40000
-
-
+/* Run file test */
 tuple<unsigned int, unsigned int, unsigned int, unsigned int> run_file_test(string file_name)
 {
     unsigned int success = 0;
@@ -304,3 +277,4 @@ TEST_CASE("Puzzle7 Test.")
     max_level = 0;
     solve_calls = 0;
 }
+#endif

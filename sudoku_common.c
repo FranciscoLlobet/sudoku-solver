@@ -2,8 +2,8 @@
 #include "sudoku_engine.h"
 
 #include <ctype.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* Get a Sudoku Malloc Instance */
 SudokuPuzzle_P Sudoku_MallocPuzzle(void)
@@ -26,93 +26,95 @@ Sudoku_RC_T Sudoku_InitializePuzzle(SudokuPuzzle_P p)
     return InitializePuzzle(p);
 }
 
-
-Sudoku_Values_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, unsigned int val)
+Sudoku_RC_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, int val)
 {
-    return SetValue(p, (Sudoku_Values_T)val, row, col);
+    return (Sudoku_RC_T)SetValue(p, (Sudoku_Values_T)val, row, col);
 }
 
-unsigned int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
+int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
-    return (unsigned int)GetValue(p, row, col);
+    return (int)GetValue(p, row, col);
 }
-
 
 int Sudoku_GetNumCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col)
 {
     return CountCandidates(p, row, col);
 }
 
-
 int Sudoku_Solve(SudokuPuzzle_P p)
 {
     return Solve(p, 0);
 }
 
-
 int Sudoku_PrintPuzzle(SudokuPuzzle_P p)
 {
     int ret = 0;
-    if(NULL == p) return -1;
+    if (NULL == p)
+        return -1;
 
     int i;
 
-    for(i = 0; i<NUM_ROWS; i++)
+    for (i = 0; i < NUM_ROWS; i++)
     {
-        if(!(i%3)) printf("-------------------\n");
+        if (!(i % 3))
+            printf("-------------------\n");
         printf("|%d %d %d|%d %d %d|%d %d %d|\n",
-               Sudoku_GetValue(p,i,0),
-               Sudoku_GetValue(p,i,1),
-               Sudoku_GetValue(p,i,2),
-               Sudoku_GetValue(p,i,3),
-               Sudoku_GetValue(p,i,4),
-               Sudoku_GetValue(p,i,5),
-               Sudoku_GetValue(p,i,6),
-               Sudoku_GetValue(p,i,7),
-               Sudoku_GetValue(p,i,8));
-
+               Sudoku_GetValue(p, i, 0),
+               Sudoku_GetValue(p, i, 1),
+               Sudoku_GetValue(p, i, 2),
+               Sudoku_GetValue(p, i, 3),
+               Sudoku_GetValue(p, i, 4),
+               Sudoku_GetValue(p, i, 5),
+               Sudoku_GetValue(p, i, 6),
+               Sudoku_GetValue(p, i, 7),
+               Sudoku_GetValue(p, i, 8));
     }
     printf("-------------------\n");
 
-    for(i = 0; i<NUM_ROWS; i++)
+    for (i = 0; i < NUM_ROWS; i++)
     {
-        if(!(i%3)) printf("-------------------\n");
+        if (!(i % 3))
+            printf("-------------------\n");
         printf("|%d %d %d|%d %d %d|%d %d %d|\n",
-               Sudoku_GetNumCandidates(p,i,0),
-               Sudoku_GetNumCandidates(p,i,1),
-               Sudoku_GetNumCandidates(p,i,2),
-               Sudoku_GetNumCandidates(p,i,3),
-               Sudoku_GetNumCandidates(p,i,4),
-               Sudoku_GetNumCandidates(p,i,5),
-               Sudoku_GetNumCandidates(p,i,6),
-               Sudoku_GetNumCandidates(p,i,7),
-               Sudoku_GetNumCandidates(p,i,8));
-
+               Sudoku_GetNumCandidates(p, i, 0),
+               Sudoku_GetNumCandidates(p, i, 1),
+               Sudoku_GetNumCandidates(p, i, 2),
+               Sudoku_GetNumCandidates(p, i, 3),
+               Sudoku_GetNumCandidates(p, i, 4),
+               Sudoku_GetNumCandidates(p, i, 5),
+               Sudoku_GetNumCandidates(p, i, 6),
+               Sudoku_GetNumCandidates(p, i, 7),
+               Sudoku_GetNumCandidates(p, i, 8));
     }
     printf("-------------------\n");
 
     return ret;
 }
 
-void Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array)
+Sudoku_RC_T Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array)
 {
+    Sudoku_RC_T rc = Sudoku_InitializePuzzle(p);
 
-    for (unsigned int row = 0; row < NUM_ROWS; row++)
+    if (SUDOKU_RC_SUCCESS == rc)
     {
-        for (unsigned int col = 0; col < NUM_COLS; col++)
+        for (unsigned int row = 0; row < NUM_ROWS; row++)
         {
-            char char_value[2];
-
-            (void)strncpy_s(char_value, sizeof(char_value), sudoku_array + row * NUM_COLS + col, 1);
-
-            if (isdigit(char_value[0]))
+            for (unsigned int col = 0; col < NUM_COLS; col++)
             {
-                int val = atoi(char_value);
-                if(val != 0) 
+                char char_value[2];
+
+                (void)strncpy_s(char_value, sizeof(char_value), sudoku_array + row * NUM_COLS + col, 1);
+
+                if (isdigit(char_value[0]))
                 {
-                    Sudoku_SetValue(p, row, col, val);
+                    int val = atoi(char_value);
+                    if (val != 0)
+                    {
+                        Sudoku_SetValue(p, row, col, val);
+                    }
                 }
             }
         }
     }
+    return SUDOKU_RC_SUCCESS;
 }

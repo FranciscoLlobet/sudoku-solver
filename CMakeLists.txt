@@ -7,27 +7,34 @@ enable_testing()
 # Create Sudoku Engine C-Library
 add_library(sudoku-engine sudoku_engine.c sudoku_common.c)
 
+# Compile new sudoku C-library
+add_library(sudoku sudoku.c)
+
+add_executable(unittest-sudoku unittest-sudoku.cc)
+
+
+
 # Library Test Executable (System Test)
-add_executable(test-sudoku-library test-sudoku-library.cc) 
+#add_executable(test-sudoku-library test-sudoku-library.cc) 
 
 # Test Data Excecutable (System Test)
-add_executable(test-sudoku-data test-sudoku-data.cc)
+#add_executable(test-sudoku-data test-sudoku-data.cc)
 
 # Sudoku Engine Test (Unit Test)
 add_executable(test-sudoku-engine test-sudoku-engine.cc sudoku_common.c)
 
-add_executable(test-sudoku sudoku.cc)
+add_executable(test-sudoku test-sudoku.cc)
 
 # Link to test the Sudoku Library
-target_link_libraries(test-sudoku-library PUBLIC sudoku-engine)
-target_link_libraries(test-sudoku-data PUBLIC sudoku-engine)
+#target_link_libraries(test-sudoku-library PUBLIC sudoku-engine)
+#target_link_libraries(test-sudoku-data PUBLIC sudoku-engine)
 target_link_libraries(test-sudoku PUBLIC sudoku-engine)
 
 add_test(NAME sudoku-engine-test COMMAND test-sudoku-library)
-add_test(NAME sudoku-solver-test COMMAND test-sudoku-engine)
-add_test(NAME sudoku-data-test COMMAND test-sudoku-data)
+#add_test(NAME sudoku-solver-test COMMAND test-sudoku-engine)
+#add_test(NAME sudoku-data-test COMMAND test-sudoku-data)
 add_test(NAME sudoku COMMAND test-sudoku)
-
+add_test(NAME unittest-sudoku COMMAND unittest-sudoku)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

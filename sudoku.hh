@@ -1,3 +1,13 @@
+/**
+ * @file sudoku.hh
+ * @author Francisco Llobet (llobetblandino@gmail.com)
+ * @brief Sudoku Solver C++ Library
+ * @version 0.1
+ * @date 2022-09-24
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
 #ifndef SUDOKU_HH_INCLUDED
 #define SUDOKU_HH_INCLUDED
 
@@ -14,7 +24,7 @@ public:
 
     /**
      * @brief Construct a new Sudoku Puzzle object using string notation
-     * 
+     *
      * @param p : Sudoku Puzzle in string notation
      */
     SudokuPuzzle(std::string p);
@@ -51,7 +61,7 @@ public:
      * @param val
      * @return SudokuPuzzle
      */
-    SudokuPuzzle * SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
+    SudokuPuzzle *SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
 
     /**
      * @brief Get the Value object
@@ -68,6 +78,7 @@ public:
      * @return Sudoku_RC_T
      */
     Sudoku_RC_T Solve(void); // Solve this puzzle
+
 private:
     /**
      * @brief Construct a new Sudoku Puzzle object
@@ -86,11 +97,11 @@ private:
 
     /**
      * @brief Initialize Puzzle using Cxx object
-     * 
-     * @param p 
-     * @return Sudoku_RC_T 
+     *
+     * @param p
+     * @return Sudoku_RC_T
      */
-    Sudoku_RC_T InitializePuzzle(SudokuPuzzle * p);
+    Sudoku_RC_T InitializePuzzle(SudokuPuzzle *p);
 
     /**
      * @brief Recursively solve puzzle object
@@ -105,7 +116,6 @@ private:
      */
     struct SudokuPuzzle_S puzzle;
 };
-
 
 unsigned int GetMaxLevel(void);
 

@@ -2,6 +2,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest/doctest.h"
 
+#include "test-sudoku.hh"
+
 #include "sudoku_engine.h"
 
 extern "C"
@@ -9,19 +11,7 @@ extern "C"
 #include "sudoku_engine.c"
 }
 
-const char *sudokuTestArrays[] = {
-    "974236158638591742125487936316754289742918563589362417867125394253649871491873625", /* Array 0 */
-    "2564891733746159829817234565932748617128.6549468591327635147298127958634849362715", /* Array 1 */
-    "3.542.81.4879.15.6.29.5637485.793.416132.8957.74.6528.2413.9.655.867.192.965124.8", /* Array 2 */
-    "..2.3...8.....8....31.2.....6..5.27..1.....5.2.4.6..31....8.6.5.......13..531.4..", /* Array 3*/
-    "11...............................................................................", /* Array 4 */
-    "1........1.......................................................................", /* Array 5 */
-    "1.........1.........1............................................................", /* Array 6 */
-};
-
-
-
-TEST_CASE("Correct Row. Now Candidates left")
+TEST_CASE("Correct Row. No Candidates left")
 {
     struct SudokuPuzzle_S p;
 
@@ -151,7 +141,7 @@ TEST_CASE("Correct Column. Now Candidates left")
     CHECK(mask == 0);
 }
 
-TEST_CASE("Correct Subgrid. Now Candidates left")
+TEST_CASE("Correct Subgrid. No Candidates left")
 {
     struct SudokuPuzzle_S p;
 
@@ -242,103 +232,72 @@ TEST_CASE("Subgrid Error")
     CHECK(mask == 0);
 }
 
-TEST_CASE("Test Pruning Valid Case")
+TEST_CASE("Test Pruning Valid Cases")
 {
     struct SudokuPuzzle_S p;
-    enum Sudoku_RC_E rc;
+ 
+    SUBCASE("Already Solved Puzzle")
+    {
+        Sudoku_InitializeFromArray(&p, validTestPuzzles[0].c_str());
+        CHECK(SUDOKU_RC_SUCCESS == PrunePuzzle(&p));
+    }
 
-    Sudoku_InitializePuzzle(&p);
-
-    Sudoku_InitializeFromArray(&p, sudokuTestArrays[3]); /* Invalid Sudoku Puzzle*/
-
-    rc = PrunePuzzle(&p);
-
-    CHECK(rc == SUDOKU_RC_SUCCESS);
-}
-
-TEST_CASE("Test Pruning Invalid case")
-{
-    struct SudokuPuzzle_S p;
-    enum Sudoku_RC_E rc;
-
-    Sudoku_InitializePuzzle(&p);
-
-    Sudoku_InitializeFromArray(&p, sudokuTestArrays[4]); /* Invalid Sudoku Puzzle*/
-
-    rc = PrunePuzzle(&p);
-
-    CHECK(rc == SUDOKU_RC_ERROR);
-}
-
-TEST_CASE("Test Solve Invalid case")
-{
-    struct SudokuPuzzle_S p;
-    enum Sudoku_RC_E rc;
-
-    Sudoku_InitializePuzzle(&p);
-
-    Sudoku_InitializeFromArray(&p, sudokuTestArrays[4]); /* Invalid Sudoku Puzzle*/
-
-    rc = Solve(&p, 0);
-
-    CHECK(rc == SUDOKU_RC_ERROR);
-}
-
-TEST_CASE("Test Solve Invalid case 2")
-{
-    struct SudokuPuzzle_S p;
-    enum Sudoku_RC_E rc;
-
-    Sudoku_InitializePuzzle(&p);
-
-    Sudoku_InitializeFromArray(&p, sudokuTestArrays[5]); /* Invalid Sudoku Puzzle*/
-
-    rc = Solve(&p, 0);
-
-    CHECK(rc == SUDOKU_RC_ERROR);
-}
-
-TEST_CASE("Test Solve Invalid case 3")
-{
-    struct SudokuPuzzle_S p;
-    enum Sudoku_RC_E rc;
-
-    Sudoku_InitializePuzzle(&p);
-
-    Sudoku_InitializeFromArray(&p, sudokuTestArrays[6]); /* Invalid Sudoku Puzzle*/
-
-    rc = Solve(&p, 0);
-
-    CHECK(rc == SUDOKU_RC_ERROR);
-}
-
-TEST_CASE("Test Solve Valid Case")
-{
-    struct SudokuPuzzle_S p;
-    enum Sudoku_RC_E rc;
+    SUBCASE("Almost Solved Puzzle")
+    {
+        Sudoku_InitializeFromArray(&p,validTestPuzzles[1].c_str());
+        CHECK(SUDOKU_RC_SUCCESS == PrunePuzzle(&p));
+    }
 
     SUBCASE("Test Naked Singles")
     {
-        Sudoku_InitializePuzzle(&p);
-
-        Sudoku_InitializeFromArray(&p, sudokuTestArrays[2]); /* Valid Sudoku Puzzle*/
-
-        rc = Solve(&p, 0);
-
-        CHECK(rc == SUDOKU_RC_SUCCESS);
+        Sudoku_InitializeFromArray(&p,validTestPuzzles[2].c_str());
+        CHECK(SUDOKU_RC_SUCCESS == PrunePuzzle(&p));
     }
+
     SUBCASE("Test Hidden Singles")
     {
-        Sudoku_InitializePuzzle(&p);
-
-        Sudoku_InitializeFromArray(&p, sudokuTestArrays[3]); /* Valid Sudoku Puzzle*/
-
-        rc = Solve(&p, 0);
-
-        CHECK(rc == SUDOKU_RC_SUCCESS);
+        Sudoku_InitializeFromArray(&p,validTestPuzzles[3].c_str());
+        CHECK(SUDOKU_RC_PRUNE == PrunePuzzle(&p));
     }
 }
 
+TEST_CASE("Test Pruning Invalid Cases")
+{
+    struct SudokuPuzzle_S p;
+ 
+    for(auto x : invalidTestPuzzles)
+    {
+        Sudoku_InitializeFromArray(&p, x.c_str());
+        CHECK(SUDOKU_RC_ERROR == PrunePuzzle(&p));
+    }
+}
+
+TEST_CASE("Test Valid Puzzles")
+{
+    struct SudokuPuzzle_S p;
+
+    for(auto x: validTestPuzzles)
+    {
+        Sudoku_InitializeFromArray(&p, x.c_str());
+        CHECK(SUDOKU_RC_SUCCESS == Solve(&p, 0));
+    }
+}
+
+TEST_CASE("Test Invalid Puzzles")
+{
+    struct SudokuPuzzle_S p;
+
+    for(auto x: invalidTestPuzzles)
+    {
+        Sudoku_InitializeFromArray(&p, x.c_str());
+        CHECK(SUDOKU_RC_ERROR == Solve(&p, 0));
+    }
+}
+
+
+
+
+#if 0
 TEST_CASE("Test validate Grid")
 {
     struct SudokuPuzzle_S p;
@@ -385,3 +344,4 @@ TEST_CASE("Test validate Grid")
         CHECK(rc == SUDOKU_RC_PRUNE);
     }
 }
+#endif

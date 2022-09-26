@@ -15,12 +15,13 @@ extern "C"
     /* CONSTANT DEFINITIONS ************************************************* */
     /* ********************************************************************** */
 
-#define NUM_ROWS 9 // Number of rows in a puzzle.
-#define NUM_COLS 9 // Number of columns in a puzzle.
-#define NUM_SUBGRID 9 // Number of subgrids in a puzzle.
+#define NUM_ROWS 9         // Number of rows in a puzzle.
+#define NUM_COLS 9         // Number of columns in a puzzle.
+#define NUM_SUBGRID 9      // Number of subgrids in a puzzle.
 #define NUM_SUBGRID_COLS 3 // Number of columns in a subgrid.
-#define NUM_SUBGRID_ROWS 3 // Number of columns in a subgrid.
-#define NUM_CANDIDATES 9 // Number of candidates a cell can have.
+#define NUM_SUBGRID_ROWS 3 // Number of rows in a subgrid.
+#define NUM_SUBGRID_ELEMENTS 9 // Number of elements in a subgrid
+#define NUM_CANDIDATES 9   // Number of candidates a cell can have.
 
 #define SUDOKU_MASK_NONE ((uint32_t)0)
 #define SUDOKU_MASK_1 ((uint32_t)(1 << 0))
@@ -33,13 +34,13 @@ extern "C"
 #define SUDOKU_MASK_8 ((uint32_t)(1 << 7))
 #define SUDOKU_MASK_9 ((uint32_t)(1 << 8))
 #define SUDOKU_MASK_ALL ((uint32_t)(SUDOKU_MASK_1 | SUDOKU_MASK_2 | SUDOKU_MASK_3 | SUDOKU_MASK_4 | SUDOKU_MASK_5 | SUDOKU_MASK_6 | SUDOKU_MASK_7 | SUDOKU_MASK_8 | SUDOKU_MASK_9))
-#define SUDOKU_MASK_INVALID    ((uint32_t)UINT32_MAX)
+#define SUDOKU_MASK_INVALID ((uint32_t)UINT32_MAX)
 
     /**
      * @brief Sudoku Cell Values.
-     * 
+     *
      * Enumeration of valid and some invalid values a sudoku cell can hold
-     * 
+     *
      */
     typedef enum SudokuValues_E
     {
@@ -64,7 +65,7 @@ extern "C"
     typedef enum SudokuBitValues_E
     {
         SUDOKU_BIT_INVALID_VALUE = (int32_t)SUDOKU_MASK_INVALID, /* May resolve to -1 if signed */
-        SUDOKU_BIT_NO_VALUE = (int32_t)SUDOKU_MASK_NONE, /* Bit mask for no value */
+        SUDOKU_BIT_NO_VALUE = (int32_t)SUDOKU_MASK_NONE,         /* Bit mask for no value */
         SUDOKU_BIT_VALUE_1 = (int32_t)SUDOKU_MASK_1,
         SUDOKU_BIT_VALUE_2 = (int32_t)SUDOKU_MASK_2,
         SUDOKU_BIT_VALUE_3 = (int32_t)SUDOKU_MASK_3,
@@ -73,7 +74,7 @@ extern "C"
         SUDOKU_BIT_VALUE_6 = (int32_t)SUDOKU_MASK_6,
         SUDOKU_BIT_VALUE_7 = (int32_t)SUDOKU_MASK_7,
         SUDOKU_BIT_VALUE_8 = (int32_t)SUDOKU_MASK_8,
-        SUDOKU_BIT_VALUE_9 = (int32_t)SUDOKU_MASK_9, 
+        SUDOKU_BIT_VALUE_9 = (int32_t)SUDOKU_MASK_9,
         SUDOKU_BIT_VALUE_ALL = (int32_t)SUDOKU_MASK_ALL /* 511 */
     } Sudoku_BitValues_T;
 
@@ -119,7 +120,7 @@ extern "C"
      *
      * @return enum Sudoku_RC_E
      */
-    enum Sudoku_RC_E Sudoku_InitializePuzzle(SudokuPuzzle_P p);
+    Sudoku_RC_T Sudoku_InitializePuzzle(SudokuPuzzle_P p);
 
     /**
      * @brief Initialize a Sudoku Solver Puzzle Object from string array notation.
@@ -127,7 +128,7 @@ extern "C"
      * @param p : Valid reference to Sudoku Puzzle.
      * @param sudoku_array : C-Style string containing a Sudoku puzzle in array notation.
      */
-    void Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array);
+    Sudoku_RC_T Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array);
 
     /**
      * @brief Set numeric value of a puzzle cell using row and column indexes.
@@ -136,9 +137,8 @@ extern "C"
      * @param row : Row index.
      * @param col : Column Index.
      * @param val : Numeric value to asign.
-     * @return Sudoku_Values_T
      */
-    Sudoku_Values_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, unsigned int val);
+    Sudoku_RC_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, int val);
 
     /**
      * @brief Get numeric value of a puzzle cell using row and column indexes
@@ -148,7 +148,22 @@ extern "C"
      * @param col
      * @return unsigned int
      */
-    unsigned int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
+    int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
+
+    /**
+     * @brief Check the puzzle for validity or completeness
+     *
+     * @param p
+     * @return Sudoku_RC_T
+     */
+    Sudoku_RC_T Sudoku_Check(SudokuPuzzle_P p);
+
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
 
     int Sudoku_GetNumCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col);
 
