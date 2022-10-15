@@ -11,8 +11,9 @@
 #ifndef SUDOKU_HH_INCLUDED
 #define SUDOKU_HH_INCLUDED
 
-#include "sudoku_engine.h"
 #include <string>
+#include "sudoku.h"
+
 
 class SudokuPuzzle
 {
@@ -103,6 +104,8 @@ private:
      */
     Sudoku_RC_T InitializePuzzle(SudokuPuzzle *p);
 
+    SudokuPuzzle *SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T val);
+
     /**
      * @brief Recursively solve puzzle object
      *
@@ -110,23 +113,16 @@ private:
      * @return Sudoku_RC_T
      */
     Sudoku_RC_T Solve(unsigned int level);
-
+   
     /**
-     * @brief Sudoku Puzzle struct
+     * @brief Sudoku Puzzle reference
      */
-    struct SudokuPuzzle_S puzzle;
+    SudokuPuzzle_P puzzle;
 };
 
 unsigned int GetMaxLevel(void);
-
-/* Create CPP based solver */
-class SudokuSolver
-{
-public:
-    Sudoku_RC_T Solve(void);
-    Sudoku_RC_T Solve(SudokuPuzzle &p);                     // Solve this puzzle
-    Sudoku_RC_T Solve(SudokuPuzzle &p, unsigned int level); // Recursive Level info
-    Sudoku_RC_T Prune(void);                                // Solve this puzzle
-};
+unsigned int GetSolveCalls(void);
+void ResetMaxLevel(void);
+void ResetSolveCalls(void);
 
 #endif // SUDOKU_HH_INCLUDED

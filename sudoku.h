@@ -15,13 +15,13 @@ extern "C"
     /* CONSTANT DEFINITIONS ************************************************* */
     /* ********************************************************************** */
 
-#define NUM_ROWS 9         // Number of rows in a puzzle.
-#define NUM_COLS 9         // Number of columns in a puzzle.
-#define NUM_SUBGRID 9      // Number of subgrids in a puzzle.
-#define NUM_SUBGRID_COLS 3 // Number of columns in a subgrid.
-#define NUM_SUBGRID_ROWS 3 // Number of rows in a subgrid.
+#define NUM_ROWS 9             // Number of rows in a puzzle.
+#define NUM_COLS 9             // Number of columns in a puzzle.
+#define NUM_SUBGRID 9          // Number of subgrids in a puzzle.
+#define NUM_SUBGRID_COLS 3     // Number of columns in a subgrid.
+#define NUM_SUBGRID_ROWS 3     // Number of rows in a subgrid.
 #define NUM_SUBGRID_ELEMENTS 9 // Number of elements in a subgrid
-#define NUM_CANDIDATES 9   // Number of candidates a cell can have.
+#define NUM_CANDIDATES 9       // Number of candidates a cell can have.
 
 #define SUDOKU_MASK_NONE ((uint32_t)0)
 #define SUDOKU_MASK_1 ((uint32_t)(1 << 0))
@@ -44,8 +44,9 @@ extern "C"
      */
     typedef enum SudokuValues_E
     {
-        SUDOKU_INVALID_VALUE = -1,
-        SUDOKU_NO_VALUE = 0,
+        SUDOKU_NOT_EXCLUSIVE_VALUE = -2, /* More than one value, will think about using 16 (?) */
+        SUDOKU_INVALID_VALUE = -1,       /* Invalid value */
+        SUDOKU_NO_VALUE = 0,             /* No value */
         SUDOKU_VALUE_1 = 1,
         SUDOKU_VALUE_2 = 2,
         SUDOKU_VALUE_3 = 3,
@@ -55,7 +56,7 @@ extern "C"
         SUDOKU_VALUE_7 = 7,
         SUDOKU_VALUE_8 = 8,
         SUDOKU_VALUE_9 = 9,
-        SUDOKU_INVALID_VALUE_10 = 10
+        SUDOKU_INVALID_VALUE_10 = 10 /* Out of bounds value */
     } Sudoku_Values_T;
 
     /**
@@ -141,6 +142,17 @@ extern "C"
     Sudoku_RC_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, int val);
 
     /**
+     * @brief
+     *
+     * @param p
+     * @param row
+     * @param col
+     * @param value
+     * @return Sudoku_RC_T
+     */
+    Sudoku_RC_T Sudoku_SetValueUsingBitmask(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T value);
+
+    /**
      * @brief Get numeric value of a puzzle cell using row and column indexes
      *
      * @param p
@@ -158,25 +170,25 @@ extern "C"
      */
     Sudoku_RC_T Sudoku_Check(SudokuPuzzle_P p);
 
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
+    Sudoku_RC_T Sudoku_RemoveCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T candidate);
 
-    int Sudoku_GetNumCandidates(SudokuPuzzle_P p, unsigned int row, unsigned int col);
+    Sudoku_BitValues_T Sudoku_GetCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
+
+    Sudoku_BitValues_T Sudoku_SelectCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T *row, Sudoku_Column_Index_T *col);
+
+    Sudoku_RC_T Sudoku_PrunePuzzle(SudokuPuzzle_P p);
+
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    /* ********************************************************************** */
+    int Sudoku_PrintPuzzle(SudokuPuzzle_P p);
 
     SudokuPuzzle_P Sudoku_MallocPuzzle(void);
     void Sudoku_FreePuzzle(SudokuPuzzle_P puzzle);
     SudokuPuzzle_P Sudoku_CopyPuzzle(SudokuPuzzle_P destination, SudokuPuzzle_P source);
-
-    int Sudoku_Solve(SudokuPuzzle_P p);
-    int Sudoku_PrintPuzzle(SudokuPuzzle_P p);
-    int Sudoku_RemoveCandidate(SudokuCell_P cell, int cand);
-
-    /* Set Cell Value in Puzzle given row and column */
-    enum SudokuValues_E SetValue(SudokuPuzzle_P puzzle, enum SudokuValues_E val, unsigned int row, unsigned int col);
 
 #ifdef __cplusplus
 }

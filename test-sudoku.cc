@@ -1,29 +1,44 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest/doctest/doctest.h"
-
 #include <fstream>
 #include <iostream>
 
+#include "sudoku.hh"
 #include "test-sudoku.hh"
 
 using namespace std;
 
-#include "sudoku.cc"
-
-TEST_CASE("Solvable Puzzles")
+tuple<unsigned int, unsigned int, unsigned int, unsigned int> Process_File(string file_name)
 {
-    for(auto x : validTestPuzzles)
-    {
-        SudokuPuzzle p(x);
-        CHECK(SUDOKU_RC_SUCCESS == p.Solve());
-    }
-}
+    unsigned int success = 0;
+    unsigned int prune = 0;
+    unsigned int error = 0;
+    unsigned int count = 0;
 
-TEST_CASE("Unsolvable Puzzles")
-{
-    for(auto x : invalidTestPuzzles)
+    ifstream test_data_file;
+    string data_array;
+
+    test_data_file.open(file_name);
+    while (getline(test_data_file, data_array))
     {
-        SudokuPuzzle p(x);
-        CHECK(SUDOKU_RC_ERROR == p.Solve());
+        if (81 == data_array.length())
+        {
+            SudokuPuzzle p(data_array);
+
+            auto rc = p.Solve();
+            switch (rc)
+            {
+            case SUDOKU_RC_SUCCESS:
+                success++;
+                break;
+            case SUDOKU_RC_PRUNE:
+                prune++;
+                break;
+            default:
+                error++;
+            }
+            count++;
+        }
     }
+    test_data_file.close();
+
+    return make_tuple(success, prune, error, count);
 }

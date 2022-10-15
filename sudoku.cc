@@ -4,11 +4,14 @@
  * @brief Sudoku Solver C++ Library
  * @version 0.1
  * @date 2022-09-24
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include "sudoku.hh"
+
+/* Give access to private C-Library*/
+#include "_sudoku.h"
 
 using namespace std;
 
@@ -25,34 +28,47 @@ unsigned int GetSolveCalls(void)
     return solve_calls;
 }
 
+void ResetMaxLevel(void)
+{
+    max_level = 0;
+}
+
+void ResetSolveCalls(void)
+{
+    solve_calls = 0;
+}
+
 SudokuPuzzle::SudokuPuzzle(void)
 {
+    this->puzzle = new SudokuPuzzle_S();
     (void)this->InitializePuzzle();
 }
 
 SudokuPuzzle::SudokuPuzzle(string p)
 {
+    this->puzzle = new SudokuPuzzle_S();
     (void)this->InitializePuzzle(p);
 }
 
 SudokuPuzzle::SudokuPuzzle(SudokuPuzzle_P p)
 {
+    this->puzzle = new SudokuPuzzle_S();
     (void)this->InitializePuzzle(p);
 }
 
 /* Initialize Blank Puzzle*/
 Sudoku_RC_T SudokuPuzzle::InitializePuzzle(void)
 {
-    return (Sudoku_RC_T)Sudoku_InitializePuzzle(&(this->puzzle));
+    return Sudoku_InitializePuzzle(this->puzzle);
 }
 
 Sudoku_RC_T SudokuPuzzle::InitializePuzzle(string p)
 {
-    Sudoku_RC_T rc = (Sudoku_RC_T)Sudoku_InitializePuzzle(&(this->puzzle));
+    Sudoku_RC_T rc = Sudoku_InitializePuzzle(this->puzzle);
 
     if (SUDOKU_RC_SUCCESS == rc)
     {
-        Sudoku_InitializeFromArray(&(this->puzzle), p.c_str());
+        rc = Sudoku_InitializeFromArray(this->puzzle, p.c_str());
     }
 
     return rc;
@@ -66,7 +82,7 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle_P p)
     }
     else
     {
-        (void)memmove(&(this->puzzle), p, sizeof(this->puzzle));
+        (void)memmove(this->puzzle, p, sizeof(struct SudokuPuzzle_S));
     }
 
     return SUDOKU_RC_SUCCESS;
@@ -74,6 +90,11 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle_P p)
 
 Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle *p)
 {
+    if ((SudokuPuzzle *)NULL == p)
+    {
+        return SUDOKU_RC_ERROR;
+    }
+
     *this = *p;
 
     return SUDOKU_RC_SUCCESS;
@@ -81,18 +102,31 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle *p)
 
 Sudoku_RC_T SudokuPuzzle::Print(void)
 {
-    return (Sudoku_RC_T)Sudoku_PrintPuzzle(&(this->puzzle));
+    return (Sudoku_RC_T)Sudoku_PrintPuzzle(this->puzzle);
 }
 
 SudokuPuzzle *SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val)
 {
-    (void)Sudoku_SetValue(&(this->puzzle), row, col, val);
-    return this;
+    if (SUDOKU_RC_SUCCESS == Sudoku_SetValue(this->puzzle, row, col, val))
+    {
+        return this;
+    }
+
+    return NULL;
+}
+
+SudokuPuzzle *SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T val)
+{
+    if (SUDOKU_RC_SUCCESS == Sudoku_SetValueUsingBitmask(this->puzzle, row, col, val))
+    {
+        return this;
+    }
+    return NULL;
 }
 
 Sudoku_Values_T SudokuPuzzle::GetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
 {
-    return (Sudoku_Values_T)Sudoku_GetValue(&(this->puzzle), row, col);
+    return (Sudoku_Values_T)Sudoku_GetValue(this->puzzle, row, col);
 }
 
 Sudoku_RC_T SudokuPuzzle::Solve(void)
@@ -106,15 +140,17 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
     solve_calls++;
 
     /* Prune and Validate Grid */
-    auto rc = PrunePuzzle(&(this->puzzle));
+    auto rc = Sudoku_PrunePuzzle(this->puzzle);
 
     while (rc == SUDOKU_RC_PRUNE)
     {
-        auto cand = SimpleSelectionStrategy(&(this->puzzle));
+        Sudoku_Row_Index_T row = 0;
+        Sudoku_Column_Index_T col = 0;
+        auto cand = Sudoku_SelectCandidate(this->puzzle, &row, &col);
 
-        auto p_new = new SudokuPuzzle(&(this->puzzle)); // Creates new puzzle
+        auto p_new = new SudokuPuzzle(this->puzzle); // Creates new puzzle
 
-        rc = (p_new->SetValue(cand.row, cand.col, cand.val))->Solve(level + 1);
+        rc = (p_new->SetValue(row, col, cand))->Solve(level + 1);
 
         if (SUDOKU_RC_SUCCESS == rc)
         {
@@ -123,8 +159,8 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
         }
         else if (SUDOKU_RC_ERROR == rc)
         {
-            RemoveCandidate(&(this->puzzle), cand.row, cand.col, cand.val);
-            rc = PrunePuzzle(&(this->puzzle));
+            (void)Sudoku_RemoveCandidate(this->puzzle, row, col, cand);
+            rc = Sudoku_PrunePuzzle(this->puzzle);
         }
 
         delete (p_new);
@@ -132,149 +168,3 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
 
     return rc;
 }
-
-
-#if 0
-
-/* Run file test */
-tuple<unsigned int, unsigned int, unsigned int, unsigned int> run_file_test(string file_name)
-{
-    unsigned int success = 0;
-    unsigned int prune = 0;
-    unsigned int error = 0;
-    unsigned int count = 0;
-    ifstream test_data_file;
-    string data_array;
-    
-    test_data_file.open(file_name);
-
-    while (getline(test_data_file, data_array))
-    {
-        if (81 == data_array.length())
-        {
-            SudokuPuzzle p(data_array);
-
-            auto rc = p.Solve();
-            switch (rc)
-            {
-            case SUDOKU_RC_SUCCESS:
-                success++;
-                break;
-            case SUDOKU_RC_PRUNE:
-                prune++;
-                break;
-            default:
-                error++;
-            }
-            count++;
-        }
-    }
-
-    test_data_file.close();
-
-    return make_tuple(success, prune, error, count);
-}
-
-
-/**
- * @brief This Dataset tests (mostly) the pruning algorithm
- *
- * Basically one solve() call per puzzle
- *
- */
-TEST_CASE("Puzzle0 Test for pruning algorithm (100k)")
-{
-    string file_name = "../data/puzzles0_kaggle";
-    
-    auto[success, prune, error, count] = run_file_test(file_name);
-
-    CHECK(count == success);
-    CHECK(0 == error);
-    CHECK(0 == prune);
-    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
-    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
-
-    /* Reset max_level and solve calls */
-    max_level = 0;
-    solve_calls = 0;
-}
-
-/**
- * @brief
- *
- * Current benchmark: 25 Solve Calls per puzzle
- */
-TEST_CASE("Puzzle1 Test. 1M Sudoku Puzzles")
-{
-    string file_name = "../data/puzzles1_unbiased";
-    
-    auto[success, prune, error, count] = run_file_test(file_name);
-
-    CHECK(count == success);
-    CHECK(0 == error);
-    CHECK(0 == prune);
-    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
-    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
-
-    /* Reset max_level and solve calls */
-    max_level = 0;
-    solve_calls = 0;
-}
-
-
-
-TEST_CASE("Puzzle3 Test.")
-{
-    string file_name = "../data/puzzles3_magictour_top1465";
-    
-    auto[success, prune, error, count] = run_file_test(file_name);
-
-    CHECK(count == success);
-    CHECK(0 == error);
-    CHECK(0 == prune);
-    
-    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
-    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
-
-    /* Reset max_level and solve calls */
-    max_level = 0;
-    solve_calls = 0;
-}
-
-TEST_CASE("Puzzle6 Test.")
-{
-    string file_name = "../data/puzzles6_forum_hardest_1106";
-    
-    auto[success, prune, error, count] = run_file_test(file_name);
-
-    CHECK(count == success);
-    CHECK(0 == error);
-    CHECK(0 == prune);
-    
-    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
-    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
-
-    /* Reset max_level and solve calls */
-    max_level = 0;
-    solve_calls = 0;
-}
-
-
-TEST_CASE("Puzzle7 Test.")
-{
-    string file_name = "../data/puzzles7_serg_benchmark";
-    
-    auto[success, prune, error, count] = run_file_test(file_name);
-
-    CHECK(count == success);
-    CHECK(0 == error);
-    CHECK(0 == prune);
-    
-    double solves_per_puzzle = (double)GetSolveCalls() / (double)count;
-    cout << count << " Max Level: " << GetMaxLevel() << " Solve Calls: " << GetSolveCalls() << " spp: " << solves_per_puzzle << endl;
-
-    /* Reset max_level and solve calls */
-    max_level = 0;
-    solve_calls = 0;
-}
-#endif

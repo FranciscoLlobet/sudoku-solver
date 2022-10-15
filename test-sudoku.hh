@@ -12,6 +12,7 @@ extern "C" {
 #include <string>
 #include <array>
 #include <vector>
+#include <tuple>
 
 const std::vector<std::string> validTestPuzzles = {
     "974236158638591742125487936316754289742918563589362417867125394253649871491873625", /* Already solved puzzle */
@@ -26,6 +27,11 @@ const std::vector<std::string> invalidTestPuzzles = {
     "1.........1.........1............................................................", /* Invalid puzzle. Same Subgrid */
 };
 
+const std::vector<std::string> subgridTest = {
+    "123000000546000000789000000000000000000000000000000000000000000000000000000000000", /* Full subgid mask */
+    "123000000506000000789000000000000000000000000000000000000000000000000000000000000" /* Missing only one value */
+};
+
 const std::vector<std::string> testFileNames = {
     "../data/puzzles0_kaggle",
     "../data/puzzles1_unbiased",
@@ -37,5 +43,7 @@ const std::vector<std::string> testFileNames = {
     "../data/puzzles7_serg_benchmark",
     "../data/puzzles8_gen_puzzles"
 };
+
+std::tuple<unsigned int, unsigned int, unsigned int, unsigned int>Process_File(std::string file_name);
 
 #endif // TEST_SUDOKU_HH_INCLUDED

@@ -169,7 +169,7 @@ TEST_CASE("Check Puzzle")
     }
     SUBCASE("Check Hidden Singles")
     {
-        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[2].c_str()));
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[3].c_str()));
         CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p));
     }
     SUBCASE("Check Invalid Cases")
@@ -268,4 +268,215 @@ TEST_CASE("Generate Column Masks in Puzzle")
     {
         CHECK((uint32_t)SUDOKU_MASK_NONE == p.col_candidates[col]);
     }
+}
+
+TEST_CASE("Generate Subgrid Mask")
+{
+    struct SudokuPuzzle_S p;
+    SUBCASE("Work with initialized puzzle")
+    {
+        Sudoku_InitializePuzzle(&p);
+
+        generateSubGridMask(&p, 0, 0);
+        CHECK(SUDOKU_MASK_ALL == p.sub_candidates[0][0]);
+    }
+    SUBCASE("Generate Subgrid mask")
+    {
+        (void)Sudoku_InitializeFromArray(&p, subgridTest[0].c_str());
+
+        generateSubGridMask(&p, 0, 0);
+
+        CHECK(SUDOKU_MASK_NONE == p.sub_candidates[0][0]); // No candidates left
+    }
+    SUBCASE("Generate incomplete mask")
+    {
+        (void)Sudoku_InitializeFromArray(&p, subgridTest[1].c_str());
+
+        generateSubGridMask(&p, 0, 0);
+
+        CHECK(SUDOKU_MASK_4 == p.sub_candidates[0][0]); // One Candidate Left
+    }
+}
+
+TEST_CASE("Generate Subgrid Masks in puzzle")
+{
+    struct SudokuPuzzle_S p;
+
+    SUBCASE("Test empty grids")
+    {
+        Sudoku_InitializePuzzle(&p);
+        generateSubgridMasks(&p);
+
+        for (Sudoku_Row_Index_T sub_row = 0; sub_row < NUM_SUBGRID_ROWS; sub_row++)
+        {
+            for (Sudoku_Column_Index_T sub_col = 0; sub_col < NUM_SUBGRID_COLS; sub_col++)
+            {
+                CHECK(SUDOKU_MASK_ALL == p.sub_candidates[sub_row][sub_col]);
+            }
+        }
+    }
+}
+
+TEST_CASE("Prune Cells")
+{
+    struct SudokuPuzzle_S p;
+
+    (void)Sudoku_InitializePuzzle(&p);
+
+    /* Set all columns except the 5th */
+    for (int i = 0; i < NUM_COLS; i++)
+    {
+        if (i != 4)
+            (void)Sudoku_SetValue(&p, 0, i, i + 1);
+    }
+
+    CHECK(0 == Sudoku_GetValue(&p, 0, 4));
+
+    // Get row mask
+    CHECK(0 != generateColumnMasks(&p));
+    CHECK(0 != generateRowMasks(&p));
+    CHECK(0 != generateSubgridMasks(&p));
+
+    // Update Cell Mask
+
+    CHECK((SUDOKU_BIT_VALUE_5) == p.row_candidates[0]);
+    CHECK((SUDOKU_BIT_VALUE_ALL) == p.col_candidates[4]);
+
+    // Update Cell mask
+    CHECK(1 == generateCellMask(&p, 0, 4)); /* Cell only contains one element */
+
+    CHECK(SUDOKU_BIT_VALUE_5 == p.grid[0][4].candidates);
+    CHECK(SUDOKU_RC_PRUNE == updateCellCandidates(&p, 0, 4));
+    CHECK(SUDOKU_BIT_NO_VALUE == p.grid[0][4].candidates);
+    CHECK(5 == Sudoku_GetValue(&p, 0, 4));
+}
+
+TEST_CASE("Update puzzle candidates")
+{
+    struct SudokuPuzzle_S p;
+
+    // Test valid puzzles
+    SUBCASE("Already Solved Puzzle")
+    {
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[0].c_str()));
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_Check(&p));
+
+        // Test pruning mechanism
+        CHECK(0 != generateColumnMasks(&p));
+        CHECK(0 != generateRowMasks(&p));
+        CHECK(0 != generateSubgridMasks(&p));
+        CHECK(0 == generatePuzzleCellMasks(&p));
+
+        // Second running
+        CHECK(0 == generateCandidateMasks(&p));
+        CHECK(0 == updatePuzzleCandidates(&p));
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_Check(&p));
+    }
+    SUBCASE("Almost Solved Puzzle")
+    {
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[1].c_str()));
+        CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p));
+
+        // Test pruning mechanism
+        CHECK(0 != generateColumnMasks(&p));
+        CHECK(0 != generateRowMasks(&p));
+        CHECK(0 != generateSubgridMasks(&p));
+        CHECK(0 != generatePuzzleCellMasks(&p));
+        CHECK(0 == generateCandidateMasks(&p));
+
+        CHECK(1 == updatePuzzleCandidates(&p));
+        CHECK(SUDOKU_BIT_NO_VALUE == p.grid[4][4].candidates);
+        CHECK(SUDOKU_BIT_VALUE_3 == p.grid[4][4].value);
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_Check(&p));
+        
+        // Testing another run
+        CHECK(0 == generateCandidateMasks(&p));
+        CHECK(0 == updatePuzzleCandidates(&p));
+    }
+    SUBCASE("Check Naked Singles")
+    {
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[2].c_str()));
+        CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p));
+
+        CHECK(0 != generateColumnMasks(&p));
+        CHECK(0 != generateRowMasks(&p));
+        CHECK(0 != generateSubgridMasks(&p));
+        CHECK(0 != generatePuzzleCellMasks(&p));
+
+        CHECK(0 != updatePuzzleCandidates(&p)); // This solves the puzzle
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_Check(&p));
+
+        CHECK(0 != generateColumnMasks(&p));
+        CHECK(0 != generateRowMasks(&p));
+        CHECK(0 != generateSubgridMasks(&p));
+        CHECK(0 == generatePuzzleCellMasks(&p));
+        CHECK(0 == updatePuzzleCandidates(&p));
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_Check(&p));
+
+
+    }
+    SUBCASE("Check Hidden Singles")
+    {
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[3].c_str()));
+        CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p));
+
+        CHECK(0 != generateColumnMasks(&p));
+        CHECK(0 != generateRowMasks(&p));
+        CHECK(0 != generateSubgridMasks(&p));
+        CHECK(0 != generatePuzzleCellMasks(&p));
+
+        CHECK(0 == updatePuzzleCandidates(&p)); // First run does not update puzzle candidates
+        CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p)); // Just one iteration is not enough
+    }
+        SUBCASE("Check Hidden Singles2")
+    {
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, validTestPuzzles[3].c_str()));
+        CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p));
+        
+        int changes = 0;
+        do{
+            changes = generateColumnMasks(&p) + generateRowMasks(&p) + generateSubgridMasks(&p) + generatePuzzleCellMasks(&p) + updatePuzzleCandidates(&p);
+        }
+        while((changes > 0));
+        
+        CHECK(SUDOKU_RC_PRUNE == Sudoku_Check(&p)); // Just one iteration is not enough
+    }
+}
+
+TEST_CASE("Remove Candidate Test")
+{
+    struct SudokuPuzzle_S p;
+
+    CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializePuzzle(&p));
+
+    CHECK(SUDOKU_MASK_ALL == p.grid[0][0].candidates);
+    CHECK(9 == countCandidatesInCell(&p, 0, 0));
+
+    removeCandidate(&p, 0, 0, SUDOKU_MASK_1);
+    
+    CHECK((SUDOKU_MASK_ALL & ~SUDOKU_MASK_1) == p.grid[0][0].candidates);
+    CHECK(8 == countCandidatesInCell(&p, 0, 0));
+}
+
+
+TEST_CASE("Select candidate with lowest amount ")
+{
+    struct SudokuPuzzle_S p;
+    Sudoku_Row_Index_T row=0;
+    Sudoku_Column_Index_T col = 0;
+    Sudoku_BitValues_T val = SUDOKU_BIT_INVALID_VALUE;
+
+    CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializePuzzle(&p));
+    val = Sudoku_SelectCandidate(&p, &row, &col);
+    CHECK((Sudoku_Row_Index_T)0 == row);
+    CHECK((Sudoku_Column_Index_T)0 == col);
+    CHECK(SUDOKU_BIT_VALUE_1 == val);
+
+    removeCandidate(&p, 4,4, SUDOKU_MASK_1);
+    
+    val = Sudoku_SelectCandidate(&p, &row, &col);
+    
+    CHECK((Sudoku_Row_Index_T)4 == row);
+    CHECK((Sudoku_Column_Index_T)4 == col);
+    CHECK(SUDOKU_BIT_VALUE_2 == val);
 }
