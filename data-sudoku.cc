@@ -28,9 +28,6 @@ TEST_CASE("Unsolvable Puzzles")
     }
 }
 
-
-
-
 /**
  * @brief This Dataset tests (mostly) the pruning algorithm
  *
@@ -42,6 +39,7 @@ TEST_CASE("Unsolvable Puzzles")
  */
 TEST_CASE("Puzzle0 Test for pruning algorithm (100k)")
 {
+
     string file_name = "../data/puzzles0_kaggle";
 
     auto [success, prune, error, count] = Process_File(file_name);
