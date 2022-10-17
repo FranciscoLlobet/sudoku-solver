@@ -46,6 +46,8 @@ BENCHMARK(sudoku, puzzles1_unbiased, 1, 1)
     ResetMaxLevel();
     ResetSolveCalls();
 }
+
+#if 0
 BENCHMARK(sudoku, puzzles3_magictour_top1465, 1, 1)
 {
     string file_name = "../data/puzzles3_magictour_top1465";
@@ -65,7 +67,6 @@ BENCHMARK(sudoku, puzzles2_17_clue, 1, 1)
     ResetSolveCalls();
 }
 
-#if 0
     "../data/puzzles4_forum_hardest_1905",
     "../data/puzzles5_forum_hardest_1905_11+",
     "../data/puzzles6_forum_hardest_1106",
