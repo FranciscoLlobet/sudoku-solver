@@ -4,33 +4,31 @@ project(sudoku-solver VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
+set(BENCHMARK_DOWNLOAD_DEPENDENCIES 1)
+
+# include the google benchmark paclkage 
+find_package(benchmark REQUIRED)
+find_package(GTest REQUIRED)
+
+find_package(gRPC REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(Capnproto REQUIRED)
+
 # Compile new sudoku C-library
 add_library(sudoku sudoku.c)
-
-# Compile new Sudoku C++ Library
 add_library(sudoku_cc sudoku.cc sudoku.c)
+add_library(test-auxiliary test-sudoku.cc)
 
-# Unittest C-Library
 add_executable(unittest-sudoku unittest-sudoku.cc)
+add_executable(test-sudoku data-sudoku.cc)
+add_executable(benchmark-sudoku benchmark-sudoku.cc)
 
-# Data Test C++ Version
-add_executable(test-sudoku data-sudoku.cc test-sudoku.cc)
-add_executable(bench-sudoku bench-sudoku.cc test-sudoku.cc)
-
-target_link_libraries(test-sudoku PUBLIC sudoku_cc)
-target_link_libraries(bench-sudoku PUBLIC sudoku_cc)
+target_link_libraries(test-sudoku PUBLIC test-auxiliary sudoku_cc)
+target_link_libraries(benchmark-sudoku benchmark::benchmark test-auxiliary sudoku_cc)
 
 add_test(NAME unittest-sudoku COMMAND unittest-sudoku)
 add_test(NAME test-sudoku COMMAND test-sudoku)
-add_test(NAME bench-sudoku COMMAND bench-sudoku)
-
-# Link to test the Sudoku Library
-#target_link_libraries(test-sudoku-library PUBLIC sudoku-engine)
-#target_link_libraries(test-sudoku-data PUBLIC sudoku-engine)
-#target_link_libraries(test-sudoku PUBLIC sudoku-engine)
-
-#add_test(NAME sudoku-engine-test COMMAND test-sudoku-library)
-
+add_test(NAME benchmark-sudoku COMMAND benchmark-sudoku)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
