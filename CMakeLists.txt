@@ -6,6 +6,10 @@ enable_testing()
 
 add_subdirectory(doctest)
 
+include_directories(include)
+include_directories(src)
+#add_subdirectory(src)
+
 # include the google benchmark package 
 find_package(benchmark REQUIRED)
 find_package(GTest REQUIRED)
@@ -16,8 +20,8 @@ find_package(Protobuf REQUIRED)
 find_package(Capnproto REQUIRED)
 
 # Compile new sudoku C-library
-add_library(sudoku sudoku.c)
-add_library(sudoku_cc sudoku.cc sudoku)
+add_library(sudoku src/sudoku.c)
+add_library(sudoku_cc src/sudoku.cc src/sudoku.c)
 add_library(test-auxiliary test-sudoku.cc)
 
 add_executable(unittest-sudoku unittest-sudoku.cc)
