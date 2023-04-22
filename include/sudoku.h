@@ -200,10 +200,20 @@ extern "C"
     int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
 
     /**
-     * @brief Check the puzzle for validity or completeness
+     * @brief Checks if the given Sudoku puzzle is valid or not.
      *
-     * @param p
-     * @return Sudoku_RC_T
+     * This function takes a pointer to a SudokuPuzzle and checks if it's valid or not.
+     * It calls four other static functions to perform the checks, namely checkRows,
+     * checkCols, checkSubgrid, and checkEmptyVals. If the puzzle is invalid, this function
+     * returns an appropriate error code.
+     *
+     * @param p Pointer to the SudokuPuzzle to be checked.
+     * @return Sudoku_RC_T The result of the Sudoku check operation.
+     * @retval SUDOKU_RC_SUCCESS If the puzzle is valid.
+     * @retval SUDOKU_RC_ERROR If the input pointer is NULL.
+     * @retval SUDOKU_RC_PRUNE If there are empty values in the puzzle.
+     * @retval SUDOKU_RC_INVALID_INPUT If the input puzzle is invalid.
+     * @retval SUDOKU_RC_NOT_SOLVABLE If the input puzzle is not solvable.
      */
     Sudoku_RC_T Sudoku_Check(SudokuPuzzle_P p);
 

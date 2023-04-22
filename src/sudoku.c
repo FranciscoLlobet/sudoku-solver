@@ -168,117 +168,137 @@ extern "C"
         return (int)convertMaskToValue(p->grid[row][col].value);
     }
 
-    Sudoku_BitValues_T Sudoku_GetCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
+    /* Probably not used? */
+    int Sudoku_GetCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
-        unsigned int value = SUDOKU_INVALID_VALUE;
-
+        /* Get the candidates as bitmask */
+        /* */
         if (NULL == p)
         {
-            return SUDOKU_BIT_INVALID_VALUE;
+            return (int)SUDOKU_RC_NULL_POINTER;
         }
         else if (col >= NUM_COLS)
         {
-            return SUDOKU_BIT_INVALID_VALUE;
+            return (int)SUDOKU_RC_INVALID_INPUT;
         }
         else if (row >= NUM_ROWS)
         {
-            return SUDOKU_BIT_INVALID_VALUE;
+            return (int)SUDOKU_RC_INVALID_INPUT;
         }
 
-        return (Sudoku_BitValues_T)convertMaskToValue(p->grid[row][col].candidates);
+        return (int)convertMaskToValue(p->grid[row][col].candidates);
     }
 
     static Sudoku_RC_T checkRows(SudokuPuzzle_P p)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
+        if (NULL == p)
+        {
+            return SUDOKU_RC_NULL_POINTER;
+        }
 
         for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
         {
-            uint32_t val = SUDOKU_BIT_NO_VALUE;
+            uint32_t rowValues = SUDOKU_BIT_NO_VALUE;
             for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
             {
-                if ((val & p->grid[row][col].value) != 0)
+                uint32_t cellValue = p->grid[row][col].value;
+                if ((rowValues & cellValue) != 0)
                 {
                     return SUDOKU_RC_ERROR;
                 }
-                else
-                {
-                    val |= p->grid[row][col].value;
-                }
+                rowValues |= cellValue;
             }
         }
 
-        return ret;
+        return SUDOKU_RC_SUCCESS;
     }
 
     static Sudoku_RC_T checkCols(SudokuPuzzle_P p)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
+        if (NULL == p)
+        {
+            return SUDOKU_RC_NULL_POINTER;
+        }
 
         for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
         {
-            uint32_t val = SUDOKU_BIT_NO_VALUE;
+            uint32_t colValues = SUDOKU_BIT_NO_VALUE;
             for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
             {
-                if ((val & p->grid[row][col].value) != 0)
+                uint32_t cellValue = p->grid[row][col].value;
+                if ((colValues & cellValue) != 0)
                 {
                     return SUDOKU_RC_ERROR;
                 }
-                else
-                {
-                    val |= p->grid[row][col].value;
-                }
+                colValues |= cellValue;
             }
         }
 
-        return ret;
+        return SUDOKU_RC_SUCCESS;
     }
 
     static Sudoku_RC_T checkSubgrid(SudokuPuzzle_P p)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
+        if (NULL == p)
+        {
+            return SUDOKU_RC_NULL_POINTER;
+        }
 
         for (Sudoku_Row_Index_T sub_row = 0; sub_row < NUM_SUBGRID_ROWS; sub_row++)
         {
             for (Sudoku_Column_Index_T sub_col = 0; sub_col < NUM_SUBGRID_COLS; sub_col++)
             {
-                uint32_t val = SUDOKU_BIT_NO_VALUE;
-                for (unsigned int i = 0; i < NUM_SUBGRID_ROWS; i++)
+                uint32_t subgridValues = SUDOKU_BIT_NO_VALUE;
+                for (size_t i = 0; i < NUM_SUBGRID_ROWS; i++)
                 {
-                    for (unsigned int j = 0; j < NUM_SUBGRID_COLS; j++)
+                    for (size_t j = 0; j < NUM_SUBGRID_COLS; j++)
                     {
-                        uint32_t current_val = p->grid[3 * sub_row + i][3 * sub_col + j].value;
-                        if (val & current_val)
+                        uint32_t cellValue = p->grid[3 * sub_row + i][3 * sub_col + j].value;
+                        if (subgridValues & cellValue)
                         {
                             return SUDOKU_RC_ERROR;
                         }
-                        else
-                        {
-                            val |= current_val;
-                        }
+                        subgridValues |= cellValue;
                     }
                 }
             }
         }
-        return ret;
+
+        return SUDOKU_RC_SUCCESS;
     }
 
+    /**
+     * @brief Check the Sudoku grid for empty and invalid values.
+     *
+     * This function iterates through each cell in the grid, counts the
+     * number of empty and invalid values, and returns an appropriate
+     * Sudoku return code based on the count.
+     *
+     * @param[in] p Pointer to the SudokuPuzzle structure.
+     *
+     * @return SUDOKU_RC_SUCCESS if there are no empty or invalid values,
+     *         SUDOKU_RC_ERROR if there are any invalid values,
+     *         SUDOKU_RC_PRUNE if there are any empty values but no invalid values.
+     */
     static Sudoku_RC_T checkEmptyVals(SudokuPuzzle_P p)
     {
         Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
         unsigned int empty_val = 0;
         unsigned int invalid_val = 0;
 
+        // Iterate through each row and column
         for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
         {
             for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
             {
                 uint32_t val = p->grid[row][col].value;
+
+                // Check for empty values
                 if (val == SUDOKU_BIT_NO_VALUE)
                 {
                     empty_val++;
                 }
+                // Check for invalid values
                 else if (val == SUDOKU_BIT_INVALID_VALUE)
                 {
                     invalid_val++;
@@ -286,6 +306,7 @@ extern "C"
             }
         }
 
+        // Set the return code based on the number of empty and invalid values
         if (invalid_val)
         {
             ret = SUDOKU_RC_ERROR;
