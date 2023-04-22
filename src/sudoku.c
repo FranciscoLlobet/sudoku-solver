@@ -346,57 +346,68 @@ extern "C"
         return ret;
     }
 
+    /**
+     * @brief Generates a row mask for a given Sudoku puzzle and row index.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row Row index to generate the mask for.
+     * @return 1 if the row mask changed, 0 otherwise.
+     */
     static int generateRowMask(SudokuPuzzle_P p, Sudoku_Row_Index_T row)
     {
-        int change = 0;
-        uint32_t mask = (uint32_t)SUDOKU_BIT_NO_VALUE;
+        uint32_t mask = SUDOKU_BIT_NO_VALUE;
         uint32_t old_mask = p->row_candidates[row];
 
-        for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
+        for (Sudoku_Column_Index_T col = 0; col < (Sudoku_Column_Index_T)NUM_COLS; ++col)
         {
             mask |= p->grid[row][col].value;
         }
 
         p->row_candidates[row] = (~mask & SUDOKU_MASK_ALL);
 
-        if (old_mask != p->row_candidates[row])
-        {
-            change = 1;
-        }
-        return change;
+        return old_mask != p->row_candidates[row];
     }
 
+    /**
+     * @brief Generates a column mask for a given Sudoku puzzle and column index.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param col Column index to generate the mask for.
+     * @return 1 if the column mask changed, 0 otherwise.
+     */
     static int generateColumnMask(SudokuPuzzle_P p, Sudoku_Column_Index_T col)
     {
-        int change = 0;
-        uint32_t mask = (uint32_t)SUDOKU_BIT_NO_VALUE;
+        uint32_t mask = SUDOKU_BIT_NO_VALUE;
         uint32_t old_mask = p->col_candidates[col];
 
-        for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
+        for (Sudoku_Row_Index_T row = 0; row < (Sudoku_Row_Index_T)NUM_ROWS; ++row)
         {
             mask |= p->grid[row][col].value;
         }
 
         p->col_candidates[col] = (~mask & SUDOKU_MASK_ALL);
 
-        if (old_mask != p->col_candidates[col])
-        {
-            change = 1;
-        }
-        return change;
+        return old_mask != p->col_candidates[col];
     }
 
+    /**
+     * @brief Generates a subgrid mask for a given Sudoku puzzle and subgrid indices.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param sub_row Subgrid row index to generate the mask for.
+     * @param sub_col Subgrid column index to generate the mask for.
+     * @return 1 if the subgrid mask changed, 0 otherwise.
+     */
     static int generateSubGridMask(SudokuPuzzle_P p, Sudoku_Row_Index_T sub_row, Sudoku_Column_Index_T sub_col)
     {
-        int change = 0;
         Sudoku_Row_Index_T start_row = 3 * sub_row;
         Sudoku_Column_Index_T start_col = 3 * sub_col;
-        uint32_t mask = (uint32_t)SUDOKU_BIT_NO_VALUE;
+        uint32_t mask = SUDOKU_BIT_NO_VALUE;
         uint32_t old_mask = p->sub_candidates[sub_row][sub_col];
 
-        for (Sudoku_Row_Index_T row = 0; row < NUM_SUBGRID_ROWS; row++)
+        for (Sudoku_Row_Index_T row = 0; row < (Sudoku_Row_Index_T)NUM_SUBGRID_ROWS; ++row)
         {
-            for (Sudoku_Column_Index_T col = 0; col < NUM_SUBGRID_COLS; col++)
+            for (Sudoku_Column_Index_T col = 0; col < (Sudoku_Column_Index_T)NUM_SUBGRID_COLS; ++col)
             {
                 mask |= p->grid[start_row + row][start_col + col].value;
             }
@@ -404,19 +415,20 @@ extern "C"
 
         p->sub_candidates[sub_row][sub_col] = (~mask & SUDOKU_MASK_ALL);
 
-        if (old_mask != p->sub_candidates[sub_row][sub_col])
-        {
-            change = 1;
-        }
-
-        return change;
+        return old_mask != p->sub_candidates[sub_row][sub_col];
     }
 
+    /**
+     * @brief Generates row masks for a given Sudoku puzzle.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return The number of row masks changed.
+     */
     static int generateRowMasks(SudokuPuzzle_P p)
     {
         int ret = 0;
 
-        for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
+        for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; ++row)
         {
             ret += generateRowMask(p, row);
         }
@@ -424,11 +436,17 @@ extern "C"
         return ret;
     }
 
+    /**
+     * @brief Generates column masks for a given Sudoku puzzle.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return The number of column masks changed.
+     */
     static int generateColumnMasks(SudokuPuzzle_P p)
     {
         int ret = 0;
 
-        for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
+        for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; ++col)
         {
             ret += generateColumnMask(p, col);
         }
@@ -436,13 +454,19 @@ extern "C"
         return ret;
     }
 
+    /**
+     * @brief Generates subgrid masks for a given Sudoku puzzle.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return The number of subgrid masks changed.
+     */
     static int generateSubgridMasks(SudokuPuzzle_P p)
     {
         int ret = 0;
 
-        for (Sudoku_Row_Index_T sub_row = 0; sub_row < NUM_SUBGRID_ROWS; sub_row++)
+        for (Sudoku_Row_Index_T sub_row = 0; sub_row < NUM_SUBGRID_ROWS; ++sub_row)
         {
-            for (Sudoku_Column_Index_T sub_col = 0; sub_col < NUM_SUBGRID_COLS; sub_col++)
+            for (Sudoku_Column_Index_T sub_col = 0; sub_col < NUM_SUBGRID_COLS; ++sub_col)
             {
                 ret += generateSubGridMask(p, sub_row, sub_col);
             }
@@ -451,33 +475,39 @@ extern "C"
         return ret;
     }
 
+    /**
+     * @brief Generates the mask for a single cell in a Sudoku puzzle.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row The row index of the cell.
+     * @param col The column index of the cell.
+     * @return 1 if the cell mask has changed, 0 otherwise.
+     */
     static int generateCellMask(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
     {
-        int change = 0; // No change
-
-        uint32_t row_mask = p->row_candidates[row]; // Row Candidates
-        uint32_t col_mask = p->col_candidates[col]; // Column Candidate
+        uint32_t row_mask = p->row_candidates[row];
+        uint32_t col_mask = p->col_candidates[col];
         uint32_t sub_mask = p->sub_candidates[row / 3][col / 3];
-
-        uint32_t cell_mask = p->grid[row][col].candidates; // Own Cell mask
+        uint32_t cell_mask = p->grid[row][col].candidates;
 
         p->grid[row][col].candidates = (row_mask & col_mask & sub_mask & cell_mask);
 
-        if (cell_mask != p->grid[row][col].candidates)
-        {
-            change = 1; // Change
-        }
-
-        return change;
+        return cell_mask != p->grid[row][col].candidates;
     }
 
+    /**
+     * @brief Generates the masks for all cells in a Sudoku puzzle.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return The number of cell masks changed.
+     */
     static int generatePuzzleCellMasks(SudokuPuzzle_P p)
     {
         int change = 0;
 
-        for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
+        for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; ++row)
         {
-            for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
+            for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; ++col)
             {
                 change += generateCellMask(p, row, col);
             }
@@ -486,9 +516,17 @@ extern "C"
         return change;
     }
 
+    /**
+     * @brief Generates candidate masks for a Sudoku puzzle.
+     *
+     * This function iteratively generates masks for rows, columns, subgrids, and cells until no changes occur.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return The number of changes in the last iteration.
+     */
     static int generateCandidateMasks(SudokuPuzzle_P p)
     {
-        int changes = 0;
+        int changes;
 
         do
         {
@@ -498,36 +536,47 @@ extern "C"
         return changes;
     }
 
+    /**
+     * @brief Updates the cell candidates of a Sudoku puzzle.
+     *
+     * This function updates the cell candidates based on the current mask value.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row Row index of the cell.
+     * @param col Column index of the cell.
+     * @return SUDOKU_RC_SUCCESS if successful, SUDOKU_RC_ERROR if an error occurs, or SUDOKU_RC_PRUNE if the candidates were pruned.
+     */
     static int updateCellCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
     {
-        int change = (int)SUDOKU_RC_SUCCESS;
+        int change = SUDOKU_RC_SUCCESS;
+        enum SudokuValues_E  cell_value = convertMaskToValue(p->grid[row][col].candidates);
 
-        switch (convertMaskToValue(p->grid[row][col].candidates))
+        switch (cell_value)
         {
         case SUDOKU_INVALID_VALUE:
-            p->grid[row][col].value = (uint32_t)SUDOKU_MASK_INVALID;
-            p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_INVALID;
-            change = (int)SUDOKU_RC_ERROR;
+            p->grid[row][col].value = SUDOKU_MASK_INVALID;
+            p->grid[row][col].candidates = SUDOKU_MASK_INVALID;
+            change = SUDOKU_RC_ERROR;
             break;
         case SUDOKU_NO_VALUE:
-            if (p->grid[row][col].value == (uint32_t)SUDOKU_MASK_NONE)
+            if (p->grid[row][col].value == SUDOKU_MASK_NONE)
             {
-                p->grid[row][col].value = (uint32_t)SUDOKU_MASK_INVALID;
-                p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_INVALID;
-                change = (int)SUDOKU_RC_ERROR;
+                p->grid[row][col].value = SUDOKU_MASK_INVALID;
+                p->grid[row][col].candidates = SUDOKU_MASK_INVALID;
+                change = SUDOKU_RC_ERROR;
             }
             else
             {
-                change = (int)SUDOKU_RC_SUCCESS;
+                change = SUDOKU_RC_SUCCESS;
             }
             break;
         case SUDOKU_NOT_EXCLUSIVE_VALUE:
-            change = (int)SUDOKU_RC_SUCCESS;
+            change = SUDOKU_RC_SUCCESS;
             break;
         default:
             p->grid[row][col].value = p->grid[row][col].candidates;
-            p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_NONE;
-            change = (int)SUDOKU_RC_PRUNE;
+            p->grid[row][col].candidates = SUDOKU_MASK_NONE;
+            change = SUDOKU_RC_PRUNE;
             break;
         }
 
