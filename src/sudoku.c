@@ -19,34 +19,25 @@ extern "C"
         /* Clean the puzzle */
         (void)memset(p, 0, sizeof(struct SudokuPuzzle_S));
 
-        /* Initialize main grid */
+        /* Initialize main grid, row candidates, and col candidates */
         for (Sudoku_Row_Index_T row = 0; row < (Sudoku_Row_Index_T)NUM_ROWS; row++)
         {
+            p->row_candidates[row] = (uint32_t)SUDOKU_MASK_ALL;
+
             for (Sudoku_Column_Index_T col = 0; col < (Sudoku_Column_Index_T)NUM_COLS; col++)
             {
                 p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_ALL;
                 p->grid[row][col].value = (uint32_t)SUDOKU_BIT_NO_VALUE;
-            }
-        }
 
-        /* Initialize Row candidates*/
-        for (Sudoku_Row_Index_T row = 0; row < (Sudoku_Row_Index_T)NUM_COLS; row++)
-        {
-            p->row_candidates[row] = (uint32_t)SUDOKU_MASK_ALL;
-        }
+                if (row < NUM_SUBGRID_ROWS && col < NUM_SUBGRID_COLS)
+                {
+                    p->sub_candidates[row][col] = (uint32_t)SUDOKU_MASK_ALL;
+                }
 
-        /* Initialize Col Candidates */
-        for (Sudoku_Column_Index_T col = 0; col < (Sudoku_Column_Index_T)NUM_COLS; col++)
-        {
-            p->col_candidates[col] = (uint32_t)SUDOKU_MASK_ALL;
-        }
-
-        /* Initialize Subgrid Candidates */
-        for (Sudoku_Row_Index_T sub_row = 0; sub_row < NUM_SUBGRID_ROWS; sub_row++)
-        {
-            for (Sudoku_Row_Index_T sub_col = 0; sub_col < NUM_SUBGRID_COLS; sub_col++)
-            {
-                p->sub_candidates[sub_row][sub_col] = (uint32_t)SUDOKU_MASK_ALL;
+                if (row == 0)
+                {
+                    p->col_candidates[col] = (uint32_t)SUDOKU_MASK_ALL;
+                }
             }
         }
 
@@ -56,61 +47,58 @@ extern "C"
     /* Set Value */
     Sudoku_RC_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, int val)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
-
-        if (NULL == p)
+        if (p == (SudokuPuzzle_P)NULL)
         {
-            return SUDOKU_RC_ERROR;
+            return SUDOKU_RC_NULL_POINTER;
         }
-        else if (col >= NUM_COLS)
+        else if (col >= (Sudoku_Column_Index_T)NUM_COLS)
         {
-            return SUDOKU_RC_ERROR;
+            return SUDOKU_RC_INVALID_INPUT;
         }
-        else if (row >= NUM_ROWS)
+        else if (row >= (Sudoku_Row_Index_T)NUM_ROWS)
         {
-            return SUDOKU_RC_ERROR;
+            return SUDOKU_RC_INVALID_INPUT;
         }
 
         if (val == 0)
         {
-            p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_ALL; /* No Candidate left*/
+            p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_ALL; /* No candidate left */
             p->grid[row][col].value = (uint32_t)SUDOKU_BIT_NO_VALUE;
         }
         else if (val <= 9)
         {
-            p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_NONE; /* No Candidate left*/
+            p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_NONE; /* No candidate left */
             p->grid[row][col].value = 1 << ((unsigned int)val - 1);
         }
         else
         {
             p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_NONE;
             p->grid[row][col].value = (uint32_t)SUDOKU_BIT_INVALID_VALUE;
-            return SUDOKU_RC_ERROR;
+            return SUDOKU_RC_INVALID_VALUE;
         }
-        return ret;
+        return SUDOKU_RC_SUCCESS;
     }
 
     Sudoku_RC_T Sudoku_SetValueUsingBitmask(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T value)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
+        if (p == (SudokuPuzzle_P)NULL)
+        {
+            return SUDOKU_RC_NULL_POINTER;
+        }
+        else if (col >= (Sudoku_BitValues_T)NUM_COLS)
+        {
+            return SUDOKU_RC_INVALID_INPUT;
+        }
+        else if (row >= (Sudoku_Row_Index_T)NUM_ROWS)
+        {
+            return SUDOKU_RC_INVALID_INPUT;
+        }
 
-        if (NULL == p)
-        {
-            return SUDOKU_RC_ERROR;
-        }
-        else if (col >= NUM_COLS)
-        {
-            return SUDOKU_RC_ERROR;
-        }
-        else if (row >= NUM_ROWS)
-        {
-            return SUDOKU_RC_ERROR;
-        }
-        
+        /* This method does not check for the actual value, since it assumes that the Sudoku_BitValues_T enum is used */
         p->grid[row][col].candidates = (uint32_t)SUDOKU_MASK_NONE;
         p->grid[row][col].value = (uint32_t)value;
 
-        return ret;
+        return SUDOKU_RC_SUCCESS;
     }
 
     static enum SudokuValues_E convertMaskToValue(uint32_t val)
@@ -163,20 +151,18 @@ extern "C"
     /* Get Value */
     int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
-        unsigned int value = SUDOKU_INVALID_VALUE;
-
+        /* Negative values are returned in case there is an error in the input parameters */
         if (NULL == p)
         {
-            return SUDOKU_INVALID_VALUE;
+            return (int)SUDOKU_RC_NULL_POINTER;
         }
         else if (col >= NUM_COLS)
         {
-            return SUDOKU_INVALID_VALUE;
+            return (int)SUDOKU_RC_INVALID_INPUT;
         }
         else if (row >= NUM_ROWS)
         {
-            return SUDOKU_INVALID_VALUE;
+            return (int)SUDOKU_RC_INVALID_INPUT;
         }
 
         return (int)convertMaskToValue(p->grid[row][col].value);
@@ -485,12 +471,11 @@ extern "C"
 
         do
         {
-            changes = generateRowMasks(p) + generateColumnMasks(p) + generateSubgridMasks(p) +  generatePuzzleCellMasks(p);
+            changes = generateRowMasks(p) + generateColumnMasks(p) + generateSubgridMasks(p) + generatePuzzleCellMasks(p);
         } while (changes > 0);
-        
+
         return changes;
     }
-
 
     static int updateCellCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
     {
@@ -636,10 +621,10 @@ extern "C"
         Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
 
         int changes = 0;
-        do{
+        do
+        {
             changes = generateColumnMasks(p) + generateRowMasks(p) + generateSubgridMasks(p) + generatePuzzleCellMasks(p) + updatePuzzleCandidates(p);
-        }
-        while((changes > 0));
+        } while ((changes > 0));
 
         return Sudoku_Check(p);
     }

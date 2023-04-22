@@ -79,19 +79,28 @@ extern "C"
         SUDOKU_BIT_VALUE_ALL = (int32_t)SUDOKU_MASK_ALL /* 511 */
     } Sudoku_BitValues_T;
 
-    /// @brief Sudoku Return Code Enumeration.
+    /**
+     * @brief Sudoku return code enumeration.
+     *
+     * This enumeration defines the possible return codes for various functions
+     * used in the Sudoku solver. It covers success, error, and intermediate states.
+     */
     typedef enum Sudoku_RC_E
     {
-        SUDOKU_RC_ERROR = -1,  /* Error Code */
-        SUDOKU_RC_SUCCESS = 0, /* Operation was succesful */
-        SUDOKU_RC_PRUNE = 1,   /* Operation was succesful, puzzle is not completely solved yet */
+        SUDOKU_RC_ERROR = INT8_MIN,  /**< Generic error code */
+        SUDOKU_RC_NULL_POINTER,      /**< Input had a NULL pointer */
+        SUDOKU_RC_INVALID_INPUT,     /**< Invalid row or column input */
+        SUDOKU_RC_INVALID_VALUE,     /**< Invalid input value. Accepted are: 0-9 */
+        SUDOKU_RC_NOT_SOLVABLE = -1, /**< Sudoku puzzle is not solvable */
+        SUDOKU_RC_SUCCESS = 0,       /**< Operation was successful */
+        SUDOKU_RC_PRUNE = 1,         /**< Operation was successful, but the puzzle is not completely solved yet */
     } Sudoku_RC_T;
 
     /// @brief Type used for Sudoku Row Index.
-    typedef unsigned int Sudoku_Row_Index_T;
+    typedef size_t Sudoku_Row_Index_T;
 
     /// @brief Type used for Sudoku Column Index.
-    typedef unsigned int Sudoku_Column_Index_T;
+    typedef size_t Sudoku_Column_Index_T;
 
     /**
      * @brief Sudoku Cell Object Reference
@@ -112,14 +121,15 @@ extern "C"
     /* ********************************************************************** */
 
     /**
-     * @brief Initialize a Sudoku Solver Puzzle Object.
+     * @brief Initialize a Sudoku puzzle object.
      *
-     * This will initialize all cells in a puzzle object to @ref SUDOKU_NO_VALUE
-     * and all candidates to ref SUDOKU_MASK_ALL.
+     * This function initializes a Sudoku puzzle object by setting all cell values
+     * to @ref SUDOKU_NO_VALUE and all candidates to @ref SUDOKU_MASK_ALL. It also
+     * initializes the row, column, and subgrid candidates accordingly.
      *
-     * @param p : Valid reference to Sudoku Puzzle.
-     *
-     * @return enum Sudoku_RC_E
+     * @param p A valid reference to a Sudoku puzzle object.
+     * @return Sudoku_RC_T Returns SUDOKU_RC_SUCCESS if the initialization is successful,
+     *         SUDOKU_RC_ERROR if the provided puzzle pointer is NULL.
      */
     Sudoku_RC_T Sudoku_InitializePuzzle(SudokuPuzzle_P p);
 
@@ -132,33 +142,60 @@ extern "C"
     Sudoku_RC_T Sudoku_InitializeFromArray(SudokuPuzzle_P p, const char *sudoku_array);
 
     /**
-     * @brief Set numeric value of a puzzle cell using row and column indexes.
+     * @brief Set the numeric value of a puzzle cell using row and column indexes.
      *
-     * @param p : Valid reference to Sudoku Puzzle.
+     * This function sets the value of a specific cell in the Sudoku puzzle. It also
+     * checks for valid input parameters and returns appropriate error codes if any
+     * of the input parameters are invalid.
+     *
+     * @param p : Valid reference to a Sudoku Puzzle.
      * @param row : Row index.
      * @param col : Column Index.
-     * @param val : Numeric value to asign.
+     * @param val : Numeric value to assign (0-9).
+     * @return Sudoku_RC_T Returns the appropriate return code based on the operation outcome:
+     * - SUDOKU_RC_SUCCESS: The operation was successful.
+     * - SUDOKU_RC_NULL_POINTER: The provided Sudoku puzzle pointer is NULL.
+     * - SUDOKU_RC_INVALID_INPUT: The row or column index is out of range.
+     * - SUDOKU_RC_INVALID_VALUE: The provided value is not within the accepted range (0-9).
      */
     Sudoku_RC_T Sudoku_SetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, int val);
 
     /**
-     * @brief
+     * @brief Set the numeric value of a puzzle cell using row and column indexes and a bitmask value.
      *
-     * @param p
-     * @param row
-     * @param col
-     * @param value
-     * @return Sudoku_RC_T
+     * This function sets the value of a specific cell in the Sudoku puzzle using a bitmask value.
+     * It also checks for valid input parameters and returns appropriate error codes if any
+     * of the input parameters are invalid.
+     *
+     * Note: This function assumes that the `Sudoku_BitValues_T` enumeration is used for the input value.
+     *
+     * @param p : Valid reference to a Sudoku Puzzle.
+     * @param row : Row index.
+     * @param col : Column Index.
+     * @param value : Numeric value to assign using a bitmask from the `Sudoku_BitValues_T` enumeration.
+     * @return Sudoku_RC_T Returns the appropriate return code based on the operation outcome:
+     * - SUDOKU_RC_SUCCESS: The operation was successful.
+     * - SUDOKU_RC_NULL_POINTER: The provided Sudoku puzzle pointer is NULL.
+     * - SUDOKU_RC_INVALID_INPUT: The row or column index is out of range.
      */
     Sudoku_RC_T Sudoku_SetValueUsingBitmask(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T value);
 
     /**
-     * @brief Get numeric value of a puzzle cell using row and column indexes
+     * @brief Get the numeric value of a puzzle cell using row and column indexes.
      *
-     * @param p
-     * @param row
-     * @param col
-     * @return unsigned int
+     * This function returns the numeric value of a cell in the puzzle.
+     * In case of invalid input parameters, it returns negative error codes.
+     *
+     * @note The users of this function should handle the return value accordingly
+     *       by checking for negative values as error codes.
+     *
+     * @param p : Valid reference to a Sudoku Puzzle.
+     * @param row : Row index.
+     * @param col : Column index.
+     * @return int : Returns the numeric value of the cell (1-9) if successful.
+     *               Returns a negative error code in case of invalid input:
+     *               - SUDOKU_RC_NULL_POINTER if the provided puzzle pointer is NULL.
+     *               - SUDOKU_RC_INVALID_INPUT if the row or column index is out of range.
      */
     int Sudoku_GetValue(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
 
