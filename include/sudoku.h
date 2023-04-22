@@ -219,10 +219,42 @@ extern "C"
 
     Sudoku_RC_T Sudoku_RemoveCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T candidate);
 
+    /**
+     * @brief Removes a candidate from a cell's candidate mask (public version).
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row Row index.
+     * @param col Column index.
+     * @param candidate Candidate to remove (as a Sudoku_BitValues_T value).
+     * @return SUDOKU_RC_SUCCESS on success, SUDOKU_RC_ERROR if the puzzle pointer is NULL.
+     */
     int Sudoku_GetCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
 
+    /**
+     * @brief Selects a candidate value for a cell in the Sudoku puzzle based on the least number of possible candidate values in a cell.
+     *
+     * This function searches for a cell with the minimum number of candidates, starting from 2.
+     * If it finds a cell with the desired number of candidates, it selects one of the candidates and returns it.
+     * It can be helpful in solving Sudoku puzzles by identifying cells that have a small number of possible values,
+     * making it easier to narrow down the correct value for that cell.
+     *
+     * @param[in] p Pointer to a Sudoku puzzle structure
+     * @param[out] row Pointer to a variable where the row index of the selected cell will be stored
+     * @param[out] col Pointer to a variable where the column index of the selected cell will be stored
+     * @return A selected candidate value if a suitable cell is found, otherwise SUDOKU_BIT_INVALID_VALUE
+     */
     Sudoku_BitValues_T Sudoku_SelectCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T *row, Sudoku_Column_Index_T *col);
 
+    /**
+     * @brief Prunes the Sudoku puzzle by iteratively generating candidate masks and updating cell candidates.
+     *
+     * This function repeatedly calls the functions to generate column masks, row masks, subgrid masks, and
+     * puzzle cell masks, and updates the puzzle's candidates until no more changes are detected.
+     * After pruning, the function checks if the Sudoku puzzle is solved or if an error has occurred.
+     *
+     * @param[in] p Pointer to a Sudoku puzzle structure
+     * @return A Sudoku return code indicating the status of the puzzle after pruning (SUDOKU_RC_SUCCESS, SUDOKU_RC_SOLVED, or SUDOKU_RC_ERROR)
+     */
     Sudoku_RC_T Sudoku_PrunePuzzle(SudokuPuzzle_P p);
 
     /* ********************************************************************** */

@@ -549,7 +549,7 @@ extern "C"
     static int updateCellCandidates(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col)
     {
         int change = SUDOKU_RC_SUCCESS;
-        enum SudokuValues_E  cell_value = convertMaskToValue(p->grid[row][col].candidates);
+        enum SudokuValues_E cell_value = convertMaskToValue(p->grid[row][col].candidates);
 
         switch (cell_value)
         {
@@ -583,6 +583,15 @@ extern "C"
         return change;
     }
 
+    /**
+     * @brief Updates the candidates of all cells in a Sudoku puzzle.
+     *
+     * This function iterates through all cells in the puzzle and updates their candidates.
+     * It also counts the number of pruned candidates and returns the result.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return Number of pruned candidates, or SUDOKU_RC_ERROR on failure.
+     */
     static int updatePuzzleCandidates(SudokuPuzzle_P p)
     {
         int change = 0;
@@ -593,28 +602,48 @@ extern "C"
             for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
             {
                 change = updateCellCandidates(p, row, col);
+
                 if (change >= 0)
+                {
                     prune_counter += change;
+                }
                 else
-                    return (int)SUDOKU_RC_ERROR;
+                {
+                    return SUDOKU_RC_ERROR; // Think about returning change (?)
+                }
             }
         }
 
         return prune_counter;
     }
 
+    /**
+     * @brief Removes a candidate from a cell's candidate mask.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row Row index.
+     * @param col Column index.
+     * @param candidate Candidate to remove (as a bitmask).
+     * @return SUDOKU_RC_SUCCESS on success.
+     */
     static Sudoku_RC_T removeCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, uint32_t candidate)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
-
         p->grid[row][col].candidates &= (SUDOKU_MASK_ALL & ~candidate);
-
-        return ret;
+        return SUDOKU_RC_SUCCESS;
     }
 
+    /**
+     * @brief Removes a candidate from a cell's candidate mask (public version).
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row Row index.
+     * @param col Column index.
+     * @param candidate Candidate to remove (as a Sudoku_BitValues_T value).
+     * @return SUDOKU_RC_SUCCESS on success, SUDOKU_RC_ERROR if the puzzle pointer is NULL.
+     */
     Sudoku_RC_T Sudoku_RemoveCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T candidate)
     {
-        if (NULL == p)
+        if (p == NULL)
         {
             return SUDOKU_RC_ERROR;
         }
@@ -622,6 +651,12 @@ extern "C"
         return removeCandidate(p, row, col, (uint32_t)candidate);
     }
 
+    /**
+     * @brief Counts the number of candidates in a given bitmask.
+     *
+     * @param mask Bitmask containing candidates.
+     * @return The number of candidates in the mask.
+     */
     static int countCandidatesInMask(uint32_t mask)
     {
         int count = 0;
@@ -633,49 +668,66 @@ extern "C"
         return count;
     }
 
+    /**
+     * @brief Counts the number of candidates in a specific cell of the puzzle.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @param row Row index.
+     * @param col Column index.
+     * @return The number of candidates in the specified cell.
+     */
     int countCandidatesInCell(SudokuPuzzle_P p, unsigned int row, unsigned int col)
     {
         return countCandidatesInMask(p->grid[row][col].candidates);
     }
 
+    /**
+     * @brief Fills the n_candidates field of the puzzle structure with the number of candidates for each cell.
+     *
+     * @param p Pointer to a SudokuPuzzle_P object.
+     * @return SUDOKU_RC_SUCCESS on success.
+     */
     Sudoku_RC_T countCandidatesInPuzzle(SudokuPuzzle_P p)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
         for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
         {
-            for (Sudoku_Column_Index_T col = 0; col < NUM_ROWS; col++)
+            for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
             {
                 p->n_candidates[row][col] = countCandidatesInCell(p, row, col);
             }
         }
 
-        return ret;
+        return SUDOKU_RC_SUCCESS;
     }
+
 
     Sudoku_BitValues_T Sudoku_SelectCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T *row, Sudoku_Column_Index_T *col)
     {
-        Sudoku_BitValues_T val = SUDOKU_BIT_INVALID_VALUE;
-        if ((NULL == p) || (NULL == row) || (NULL == col))
-        {
-            return SUDOKU_BIT_INVALID_VALUE;
-        }
+        if (p == NULL || row == NULL || col == NULL)
+            {
+                return SUDOKU_BIT_INVALID_VALUE;
+            }
 
-        (void)countCandidatesInPuzzle(p); // Count the candidates
+        countCandidatesInPuzzle(p); // Count the candidates
+
+        // Get number of candidates per cell (prio 1) -> generate prio queue
+        // Get number of candidates per value (prio 2) -> generate prio queue
 
         for (unsigned int n_cand = 2; n_cand <= NUM_CANDIDATES; n_cand++)
         {
             for (*row = 0; *row < NUM_ROWS; (*row)++)
             {
-                for (*col = 0; *col < NUM_ROWS; (*col)++)
+                for (*col = 0; *col < NUM_COLS; (*col)++)
                 {
                     if (n_cand == p->n_candidates[*row][*col])
                     {
+                        uint32_t cell_candidates = p->grid[*row][*col].candidates;
                         for (size_t i = 0; i < NUM_CANDIDATES; i++)
                         {
-                            val = (Sudoku_BitValues_T)((uint32_t)(1 << i));
-                            if (p->grid[*row][*col].candidates & (uint32_t)val)
+                            uint32_t val = (1 << i);
+                            if (cell_candidates & val)
                             {
-                                return val;
+                                return (Sudoku_BitValues_T)val;
                             }
                         }
                     }
@@ -683,18 +735,33 @@ extern "C"
             }
         }
 
-        return val;
+        return SUDOKU_BIT_INVALID_VALUE;
     }
 
+    /**
+     * @brief Prunes the Sudoku puzzle by iteratively generating candidate masks and updating cell candidates.
+     *
+     * This function repeatedly calls the functions to generate column masks, row masks, subgrid masks, and
+     * puzzle cell masks, and updates the puzzle's candidates until no more changes are detected.
+     * After pruning, the function checks if the Sudoku puzzle is solved or if an error has occurred.
+     *
+     * @param[in] p Pointer to a Sudoku puzzle structure
+     * @return A Sudoku return code indicating the status of the puzzle after pruning (SUDOKU_RC_SUCCESS, SUDOKU_RC_SOLVED, or SUDOKU_RC_ERROR)
+     */
     Sudoku_RC_T Sudoku_PrunePuzzle(SudokuPuzzle_P p)
     {
         Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
+        int changes;
 
-        int changes = 0;
         do
         {
-            changes = generateColumnMasks(p) + generateRowMasks(p) + generateSubgridMasks(p) + generatePuzzleCellMasks(p) + updatePuzzleCandidates(p);
-        } while ((changes > 0));
+            changes = 0;
+            changes += generateColumnMasks(p);
+            changes += generateRowMasks(p);
+            changes += generateSubgridMasks(p);
+            changes += generatePuzzleCellMasks(p);
+            changes += updatePuzzleCandidates(p);
+        } while (changes > 0);
 
         return Sudoku_Check(p);
     }
