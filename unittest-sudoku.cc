@@ -29,11 +29,11 @@ TEST_CASE("Set Value")
 
     SUBCASE("NULL Pointer Test")
     {
-        CHECK(SUDOKU_RC_ERROR == Sudoku_SetValue((SudokuPuzzle_P)NULL, 0, 0, 1));
+        CHECK(SUDOKU_RC_NULL_POINTER == Sudoku_SetValue((SudokuPuzzle_P)NULL, 0, 0, 1));
     }
     SUBCASE("Error Invalid Value")
     {
-        CHECK(SUDOKU_RC_ERROR == Sudoku_SetValue(&p, 0, 0, 10));
+        CHECK(SUDOKU_RC_INVALID_VALUE == Sudoku_SetValue(&p, 0, 0, 10));
     }
     SUBCASE("Error Valid Values 1..9")
     {
@@ -58,7 +58,7 @@ TEST_CASE("Get Value")
 
     SUBCASE("NULL Pointer Test")
     {
-        CHECK(SUDOKU_RC_ERROR == Sudoku_GetValue((SudokuPuzzle_P)NULL, 0, 0));
+        CHECK(SUDOKU_RC_NULL_POINTER == Sudoku_GetValue((SudokuPuzzle_P)NULL, 0, 0));
     }
     SUBCASE("Set-Get Value")
     {
