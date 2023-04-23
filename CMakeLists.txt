@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.12)
+
 project(sudoku-solver VERSION 0.1.0)
 
 include(CTest)
@@ -8,16 +9,10 @@ add_subdirectory(doctest)
 
 include_directories(include)
 include_directories(src)
-#add_subdirectory(src)
 
 # include the google benchmark package 
 find_package(benchmark REQUIRED)
 find_package(GTest REQUIRED)
-
-find_package(gRPC REQUIRED)
-find_packagE(OpenSSL REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(Capnproto REQUIRED)
 
 # Compile new sudoku C-library
 add_library(sudoku src/sudoku.c)
@@ -41,3 +36,5 @@ add_test(NAME benchmark-sudoku COMMAND benchmark-sudoku)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
+
+

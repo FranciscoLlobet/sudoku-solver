@@ -134,6 +134,21 @@ Sudoku_RC_T SudokuPuzzle::Solve(void)
     return Solve(0);
 }
 
+/**
+ * @brief Recursively solves the Sudoku Puzzle using a pruning and backtracking algorithm.
+ *
+ * The algorithm works as follows:
+ * 1. Prune the puzzle using the Sudoku_PrunePuzzle() function.
+ * 2. If the puzzle is solved, return success. If it is invalid, return an error.
+ * 3. Select a candidate value for a cell with the least number of candidates using the Sudoku_SelectCandidate() function.
+ * 4. Create a new puzzle and set the chosen candidate value in the new puzzle.
+ * 5. Recursively call the Solve() method on the new puzzle with an incremented level.
+ * 6. If the recursive call succeeds, overwrite the current puzzle with the new puzzle.
+ * 7. If the recursive call fails, remove the candidate value from the current puzzle and repeat the pruning.
+ *
+ * @param level Level of recursion.
+ * @return Sudoku_RC_T Result code.
+ */
 Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
 {
     max_level = (level > max_level) ? level : max_level;

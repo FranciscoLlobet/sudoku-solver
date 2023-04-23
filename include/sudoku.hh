@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2022-09-24
  *
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  *
  */
 #ifndef SUDOKU_HH_INCLUDED
@@ -14,108 +14,108 @@
 #include <string>
 #include "sudoku.h"
 
-
+/**
+ * @class SudokuPuzzle
+ * @brief A class representing a Sudoku puzzle with methods for initialization, solving, and manipulation.
+ */
 class SudokuPuzzle
 {
 public:
     /**
-     * @brief Construct a new and empty Sudoku Puzzle object
+     * @brief Default constructor, creates an empty Sudoku puzzle.
      */
     SudokuPuzzle(void);
 
     /**
-     * @brief Construct a new Sudoku Puzzle object using string notation
-     *
-     * @param p : Sudoku Puzzle in string notation
+     * @brief Constructor, creates a Sudoku puzzle using a string notation.
+     * @param p The input puzzle in string notation.
      */
     SudokuPuzzle(std::string p);
 
     // Manipulation functions
 
     /**
-     * @brief Initialize puzzle without arguments
-     *
-     * @return Sudoku_RC_T
+     * @brief Initializes an empty puzzle.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T InitializePuzzle(void);
 
     /**
-     * @brief Initialize puzzle using the string notation
-     *
-     * @param p : Sudoku Puzzle in string notation
-     * @return Sudoku_RC_T
+     * @brief Initializes a puzzle using a string notation.
+     * @param p The input puzzle in string notation.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T InitializePuzzle(std::string p);
 
     /**
-     * @brief Print Sudoku Puzzle to console
-     *
-     * @return Sudoku_RC_T
+     * @brief Prints the Sudoku puzzle to the console.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T Print(void);
 
     /**
-     * @brief Set the Value object
-     *
-     * @param row
-     * @param col
-     * @param val
-     * @return SudokuPuzzle
+     * @brief Sets a value in the puzzle.
+     * @param row The row index.
+     * @param col The column index.
+     * @param val The value to set.
+     * @return SudokuPuzzle A pointer to the modified puzzle object.
      */
     SudokuPuzzle *SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
 
     /**
-     * @brief Get the Value object
-     *
-     * @param row
-     * @param col
-     * @return Sudoku_Values_T
+     * @brief Gets a value from the puzzle.
+     * @param row The row index.
+     * @param col The column index.
+     * @return Sudoku_Values_T The value at the specified row and column.
      */
     Sudoku_Values_T GetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col);
 
     /**
-     * @brief Recursively solve puzzle object
-     *
-     * @return Sudoku_RC_T
+     * @brief Solves the puzzle using pruning and backtracking.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T Solve(void); // Solve this puzzle
 
 private:
     /**
-     * @brief Construct a new Sudoku Puzzle object
-     *
-     * @param p
+     * @brief Constructor, creates a new Sudoku puzzle object.
+     * @param p A pointer to an existing SudokuPuzzle_S object.
      */
     SudokuPuzzle(SudokuPuzzle_P p);
 
     /**
-     * @brief Initialize Puzzle using C-Style reference
-     *
-     * @param p
-     * @return Sudoku_RC_T
+     * @brief Initializes a puzzle using a C-style reference.
+     * @param p A pointer to an existing SudokuPuzzle_S object.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T InitializePuzzle(SudokuPuzzle_P p);
 
     /**
-     * @brief Initialize Puzzle using Cxx object
-     *
-     * @param p
-     * @return Sudoku_RC_T
+     * @brief Initializes a puzzle using a C++ object.
+     * @param p A pointer to an existing SudokuPuzzle object.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T InitializePuzzle(SudokuPuzzle *p);
 
+    /**
+     * @brief Sets a value in the puzzle using a bitmask.
+     * @param row The row index.
+     * @param col The column index.
+     * @param val The value bitmask to set.
+     * @return SudokuPuzzle A pointer to the modified puzzle object.
+     */
     SudokuPuzzle *SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T val);
 
     /**
-     * @brief Recursively solve puzzle object
+     * @brief Recursively solves the Sudoku Puzzle using pruning and backtracking.
      *
-     * @param level : Level of recursion
-     * @return Sudoku_RC_T
+     * @param level Level of recursion.
+     * @return Sudoku_RC_T Result code.
      */
     Sudoku_RC_T Solve(unsigned int level);
-   
+
     /**
-     * @brief Sudoku Puzzle reference
+     * @brief A pointer to the Sudoku Puzzle structure.
      */
     SudokuPuzzle_P puzzle;
 };
