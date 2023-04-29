@@ -13,8 +13,6 @@
 /* Give access to private C-Library*/
 #include "_sudoku.h"
 
-using namespace std;
-
 static unsigned int max_level = 0;
 static unsigned int solve_calls = 0;
 
@@ -44,7 +42,7 @@ SudokuPuzzle::SudokuPuzzle(void)
     (void)this->InitializePuzzle();
 }
 
-SudokuPuzzle::SudokuPuzzle(string p)
+SudokuPuzzle::SudokuPuzzle(const std::string &p)
 {
     this->puzzle = new SudokuPuzzle_S();
     (void)this->InitializePuzzle(p);
@@ -56,13 +54,40 @@ SudokuPuzzle::SudokuPuzzle(SudokuPuzzle_P p)
     (void)this->InitializePuzzle(p);
 }
 
+SudokuPuzzle::SudokuPuzzle(const SudokuPuzzle &p)
+{
+    this->puzzle = new SudokuPuzzle_S();
+    memcpy(this->puzzle, p.puzzle, sizeof(SudokuPuzzle_S));
+}
+
+SudokuPuzzle::~SudokuPuzzle(void)
+{
+    delete this->puzzle;
+}
+
+SudokuPuzzle &SudokuPuzzle::operator=(const SudokuPuzzle &p)
+{
+    if (this == &p)
+    {
+        return *this;
+    }
+
+    if (this->puzzle != nullptr)
+    {
+        delete this->puzzle;
+    }
+
+    this->puzzle = new SudokuPuzzle_S(*p.puzzle);
+    return *this;
+}
+
 /* Initialize Blank Puzzle*/
 Sudoku_RC_T SudokuPuzzle::InitializePuzzle(void)
 {
     return Sudoku_InitializePuzzle(this->puzzle);
 }
 
-Sudoku_RC_T SudokuPuzzle::InitializePuzzle(string p)
+Sudoku_RC_T SudokuPuzzle::InitializePuzzle(const std::string &p)
 {
     Sudoku_RC_T rc = Sudoku_InitializePuzzle(this->puzzle);
 
@@ -88,7 +113,7 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle_P p)
     return SUDOKU_RC_SUCCESS;
 }
 
-Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle *p)
+Sudoku_RC_T SudokuPuzzle::InitializePuzzle(const SudokuPuzzle *p)
 {
     if ((SudokuPuzzle *)NULL == p)
     {
@@ -97,6 +122,17 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(SudokuPuzzle *p)
 
     *this = *p;
 
+    return SUDOKU_RC_SUCCESS;
+}
+
+Sudoku_RC_T SudokuPuzzle::InitializePuzzle(const SudokuPuzzle &p)
+{
+    if (this == &p)
+    {
+        return SUDOKU_RC_SUCCESS;
+    }
+
+    *this = p;
     return SUDOKU_RC_SUCCESS;
 }
 
@@ -163,9 +199,9 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
         Sudoku_Column_Index_T col = 0;
         auto cand = Sudoku_SelectCandidate(this->puzzle, &row, &col);
 
-        auto p_new = new SudokuPuzzle(this->puzzle); // Creates new puzzle
+        SudokuPuzzle p_new(*this);
 
-        rc = (p_new->SetValue(row, col, cand))->Solve(level + 1);
+        rc = (p_new.SetValue(row, col, cand))->Solve(level + 1);
 
         if (SUDOKU_RC_SUCCESS == rc)
         {
@@ -177,8 +213,6 @@ Sudoku_RC_T SudokuPuzzle::Solve(unsigned int level)
             (void)Sudoku_RemoveCandidate(this->puzzle, row, col, cand);
             rc = Sudoku_PrunePuzzle(this->puzzle);
         }
-
-        delete (p_new);
     }
 
     return rc;

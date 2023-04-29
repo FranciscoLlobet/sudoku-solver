@@ -594,7 +594,7 @@ extern "C"
      */
     static int updatePuzzleCandidates(SudokuPuzzle_P p)
     {
-        int change = 0;
+        int change;
         int prune_counter = 0;
 
         for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
@@ -645,7 +645,7 @@ extern "C"
     {
         if (p == NULL)
         {
-            return SUDOKU_RC_ERROR;
+            return SUDOKU_RC_NULL_POINTER;
         }
 
         return removeCandidate(p, row, col, (uint32_t)candidate);
@@ -700,34 +700,105 @@ extern "C"
         return SUDOKU_RC_SUCCESS;
     }
 
+    static void countCandidateValues(SudokuPuzzle_P p)
+    {
+        for (size_t val = 0; val < NUM_CANDIDATES; val++)
+        {
+            uint32_t val_mask = (1 << val);
+            p->val_n_candidates[val] = 0;
+
+            for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
+            {
+                for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
+                {
+                    if (val_mask & p->grid[row][col].candidates)
+                    {
+                        p->val_n_candidates[val]++;
+                    }
+                }
+            }
+        }
+    }
+
+    static void countCandidatesInRows(SudokuPuzzle_P p)
+    {
+        for (Sudoku_Row_Index_T row = 0; row < NUM_ROWS; row++)
+        {
+            p->n_row_candidates[row] = 0;
+            for (size_t val = 0; val < NUM_CANDIDATES; val++)
+            {
+                if (p->row_candidates[row] & (1 << val))
+                {
+                    p->n_row_candidates[row]++;
+                }
+            }
+        }
+    }
+
+    static void countCandidatesInCols(SudokuPuzzle_P p)
+    {
+        for (Sudoku_Column_Index_T col = 0; col < NUM_COLS; col++)
+        {
+            p->n_col_candidates[col] = 0;
+            for (size_t val = 0; val < NUM_CANDIDATES; val++)
+            {
+                if (p->col_candidates[col] & (1 << val))
+                {
+                    p->n_col_candidates[col]++;
+                }
+            }
+        }
+    }
+
+    static void countCandidatesInSubgrids(SudokuPuzzle_P p)
+    {
+        for (Sudoku_Row_Index_T row = 0; row < NUM_SUBGRID_ROWS; row++)
+        {
+            for (Sudoku_Column_Index_T col = 0; col < NUM_SUBGRID_COLS; col++)
+            {
+                p->n_sub_candidates[row][col] = 0;
+                for (size_t val = 0; val < NUM_CANDIDATES; val++)
+                {
+                    if (p->sub_candidates[row][col] & (1 << val))
+                    {
+                        p->n_sub_candidates[row][col]++;
+                    }
+                }
+            }
+        }
+    }
 
     Sudoku_BitValues_T Sudoku_SelectCandidate(SudokuPuzzle_P p, Sudoku_Row_Index_T *row, Sudoku_Column_Index_T *col)
     {
         if (p == NULL || row == NULL || col == NULL)
-            {
-                return SUDOKU_BIT_INVALID_VALUE;
-            }
+        {
+            return SUDOKU_BIT_INVALID_VALUE;
+        }
 
-        countCandidatesInPuzzle(p); // Count the candidates
+        (void)countCandidatesInPuzzle(p); // Count the candidates
+        countCandidateValues(p);
+        countCandidatesInRows(p);
+        countCandidatesInCols(p);
+        countCandidatesInSubgrids(p);
 
-        // Get number of candidates per cell (prio 1) -> generate prio queue
-        // Get number of candidates per value (prio 2) -> generate prio queue
-
-        for (unsigned int n_cand = 2; n_cand <= NUM_CANDIDATES; n_cand++)
+        for (unsigned int n_cand = 2; n_cand <= 6 * NUM_CANDIDATES; n_cand++)
         {
             for (*row = 0; *row < NUM_ROWS; (*row)++)
             {
                 for (*col = 0; *col < NUM_COLS; (*col)++)
                 {
-                    if (n_cand == p->n_candidates[*row][*col])
+                    uint32_t score = 3*p->n_candidates[*row][*col] + p->n_row_candidates[*row] + p->n_col_candidates[*col] + p->n_sub_candidates[*row/3][*col/3];
+
+                    if (n_cand == score)
                     {
                         uint32_t cell_candidates = p->grid[*row][*col].candidates;
+
                         for (size_t i = 0; i < NUM_CANDIDATES; i++)
                         {
                             uint32_t val = (1 << i);
                             if (cell_candidates & val)
                             {
-                                return (Sudoku_BitValues_T)val;
+                                return (Sudoku_BitValues_T)(val);
                             }
                         }
                     }
@@ -750,8 +821,12 @@ extern "C"
      */
     Sudoku_RC_T Sudoku_PrunePuzzle(SudokuPuzzle_P p)
     {
-        Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
-        int changes;
+
+        int changes = 0;
+        if (NULL == p)
+        {
+            return SUDOKU_RC_NULL_POINTER;
+        }
 
         do
         {
@@ -770,7 +845,7 @@ extern "C"
     {
         if (NULL == sudoku_array)
         {
-            return SUDOKU_RC_ERROR;
+            return SUDOKU_RC_NULL_POINTER;
         }
 
         Sudoku_RC_T rc = Sudoku_InitializePuzzle(p);
@@ -781,7 +856,7 @@ extern "C"
             {
                 for (unsigned int col = 0; col < NUM_COLS; col++)
                 {
-                    char char_value[2];
+                    char char_value[2] = {0, 0};
 
                     (void)strncpy_s(char_value, sizeof(char_value), sudoku_array + row * NUM_COLS + col, 1);
 

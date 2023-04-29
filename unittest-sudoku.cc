@@ -88,7 +88,7 @@ TEST_CASE("Test Initialize from Array")
 
     CHECK(SUDOKU_RC_ERROR == Sudoku_InitializeFromArray(NULL, test_array));
 
-    CHECK(SUDOKU_RC_ERROR == Sudoku_InitializeFromArray(&p, NULL));
+    CHECK(SUDOKU_RC_NULL_POINTER == Sudoku_InitializeFromArray(&p, NULL));
 }
 
 TEST_CASE("Check Rows")
@@ -456,6 +456,38 @@ TEST_CASE("Remove Candidate Test")
     
     CHECK((SUDOKU_MASK_ALL & ~SUDOKU_MASK_1) == p.grid[0][0].candidates);
     CHECK(8 == countCandidatesInCell(&p, 0, 0));
+}
+
+TEST_CASE("Test Candidate Count strategy")
+{
+    struct SudokuPuzzle_S p;
+    CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializePuzzle(&p));
+
+    //generateCandidateMasks(&p);
+
+    countCandidatesInPuzzle(&p); // Count the candidates
+    countCandidateValues(&p);
+    countCandidatesInRows(&p);
+    countCandidatesInCols(&p);
+
+    for (size_t idx = 0; idx < NUM_CANDIDATES; idx++)
+    {
+        CHECK(SUDOKU_MASK_ALL == p.row_candidates[idx]);
+        CHECK(SUDOKU_MASK_ALL == p.col_candidates[idx]);
+        CHECK(9 == p.n_row_candidates[idx]);
+        CHECK(9 == p.n_col_candidates[idx]);
+    }
+    for(size_t r = 0; r < NUM_ROWS; r++)
+    {
+        for(size_t c = 0; c < NUM_COLS; c++)
+        {
+            uint32_t score = p.n_candidates[r][c] + p.n_row_candidates[r] + p.n_col_candidates[c];
+            CHECK(9*3 == score);
+        }
+    }
+
+
+
 }
 
 

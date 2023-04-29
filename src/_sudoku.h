@@ -29,6 +29,9 @@ extern "C"
 
         unsigned int n_candidates[NUM_ROWS][NUM_COLS]; /**< Number of candidates for each cell in the grid. */
         unsigned int val_n_candidates[NUM_CANDIDATES]; /**< Number of candidates for each possible value (1 to 9) in the puzzle. */
+        uint32_t n_row_candidates[NUM_ROWS];
+        uint32_t n_col_candidates[NUM_ROWS];
+        uint32_t n_sub_candidates[NUM_SUBGRID_ROWS][NUM_SUBGRID_COLS];
     };
 
 #ifdef __cplusplus

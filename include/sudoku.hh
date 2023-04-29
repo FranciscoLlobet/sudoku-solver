@@ -11,8 +11,8 @@
 #ifndef SUDOKU_HH_INCLUDED
 #define SUDOKU_HH_INCLUDED
 
-#include <string>
 #include "sudoku.h"
+#include <string>
 
 /**
  * @class SudokuPuzzle
@@ -22,6 +22,13 @@ class SudokuPuzzle
 {
 public:
     /**
+     * @brief Assignment operator for SudokuPuzzle class.
+     * @param other The SudokuPuzzle object to assign.
+     * @return SudokuPuzzle& A reference to the assigned object.
+     */
+    SudokuPuzzle &operator=(const SudokuPuzzle &other);
+
+    /**
      * @brief Default constructor, creates an empty Sudoku puzzle.
      */
     SudokuPuzzle(void);
@@ -30,7 +37,18 @@ public:
      * @brief Constructor, creates a Sudoku puzzle using a string notation.
      * @param p The input puzzle in string notation.
      */
-    SudokuPuzzle(std::string p);
+    explicit SudokuPuzzle(const std::string &p);
+
+    /**
+     * @brief Copy Constructor for SudokuPuzzle class.
+     * @param other The SudokuPuzzle object to copy.
+     */
+    SudokuPuzzle(const SudokuPuzzle &other);
+
+    /**
+     * @brief Destructor for SudokuPuzzle class.
+     */
+    ~SudokuPuzzle(void);
 
     // Manipulation functions
 
@@ -45,7 +63,14 @@ public:
      * @param p The input puzzle in string notation.
      * @return Sudoku_RC_T The result code indicating success or failure.
      */
-    Sudoku_RC_T InitializePuzzle(std::string p);
+    Sudoku_RC_T InitializePuzzle(const std::string &p);
+
+    /**
+     * @brief Initializes a puzzle using a SudokuPuzzle object reference.
+     * @param p The SudokuPuzzle object reference.
+     * @return Sudoku_RC_T The result code indicating success or failure.
+     */
+    Sudoku_RC_T InitializePuzzle(const SudokuPuzzle &p);
 
     /**
      * @brief Prints the Sudoku puzzle to the console.
@@ -58,7 +83,7 @@ public:
      * @param row The row index.
      * @param col The column index.
      * @param val The value to set.
-     * @return SudokuPuzzle A pointer to the modified puzzle object.
+     * @return SudokuPuzzle* A pointer to the modified puzzle object.
      */
     SudokuPuzzle *SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
 
@@ -74,14 +99,14 @@ public:
      * @brief Solves the puzzle using pruning and backtracking.
      * @return Sudoku_RC_T The result code indicating success or failure.
      */
-    Sudoku_RC_T Solve(void); // Solve this puzzle
+    Sudoku_RC_T Solve(void);
 
 private:
     /**
      * @brief Constructor, creates a new Sudoku puzzle object.
      * @param p A pointer to an existing SudokuPuzzle_S object.
      */
-    SudokuPuzzle(SudokuPuzzle_P p);
+    explicit SudokuPuzzle(SudokuPuzzle_P p);
 
     /**
      * @brief Initializes a puzzle using a C-style reference.
@@ -95,7 +120,7 @@ private:
      * @param p A pointer to an existing SudokuPuzzle object.
      * @return Sudoku_RC_T The result code indicating success or failure.
      */
-    Sudoku_RC_T InitializePuzzle(SudokuPuzzle *p);
+    Sudoku_RC_T InitializePuzzle(const SudokuPuzzle *p);
 
     /**
      * @brief Sets a value in the puzzle using a bitmask.

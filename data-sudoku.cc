@@ -33,8 +33,8 @@ TEST_CASE("Unsolvable Puzzles")
  *
  * Basically one solve() call per puzzle
  *
- * Max Level: 10
- * Solves Per Puzzle: 1.00052
+ * Max Level: 6
+ * Solves Per Puzzle: 1.00081
  *
  */
 TEST_CASE("Puzzle0 Test for pruning algorithm (100k)")
@@ -55,11 +55,12 @@ TEST_CASE("Puzzle0 Test for pruning algorithm (100k)")
     ResetSolveCalls();
 }
 
+
+#if 1
 /**
  * @brief
  *
- * Current benchmark: 24.89 Solve Calls per puzzle
- * Solves Per Puzzle: 24.8864
+ * Solves Per Puzzle: 20.9701
  * Max level: 17
  */
 TEST_CASE("Puzzle1 Test. 1M Sudoku Puzzles")
@@ -78,7 +79,13 @@ TEST_CASE("Puzzle1 Test. 1M Sudoku Puzzles")
     ResetMaxLevel();
     ResetSolveCalls();
 }
-
+#endif
+/**
+ * @brief
+ *
+ * Solves Per Puzzle: 662.022
+ * Max level: 22
+ */
 TEST_CASE("Puzzle3 Test.")
 {
     string file_name = "../data/puzzles3_magictour_top1465";

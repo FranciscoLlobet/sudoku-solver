@@ -59,3 +59,5 @@ docs/latex
 
 #vscode settings
 .vscode
+
+*-cppcheck-build-dir
