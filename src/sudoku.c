@@ -752,48 +752,46 @@ extern "C"
             return SUDOKU_BIT_INVALID_VALUE;
         }
 
-        (void)countCandidatesInPuzzle(p); // Count the candidates
+        countCandidatesInPuzzle(p);
         countCandidateValues(p);
         countCandidatesInRows(p);
         countCandidatesInCols(p);
         countCandidatesInSubgrids(p);
 
-        for (unsigned int n_cand = 2; n_cand <= 6 * NUM_CANDIDATES; n_cand++)
+        int min_score = INT32_MAX;
+        Sudoku_BitValues_T best_candidate = SUDOKU_BIT_INVALID_VALUE;
+        Sudoku_Row_Index_T best_row = 0;
+        Sudoku_Column_Index_T best_col = 0;
+
+        for (*row = 0; *row < NUM_ROWS; (*row)++)
         {
-            for (*row = 0; *row < NUM_ROWS; (*row)++)
+            for (*col = 0; *col < NUM_COLS; (*col)++)
             {
-                for (*col = 0; *col < NUM_COLS; (*col)++)
+                uint32_t cell_candidates = p->grid[*row][*col].candidates;
+                uint32_t score = 3 * p->n_candidates[*row][*col] + p->n_row_candidates[*row] + p->n_col_candidates[*col] + p->n_sub_candidates[*row / 3][*col / 3];
+
+                for (size_t i = 0; i < NUM_CANDIDATES; i++)
                 {
-                    uint32_t score = 3 * p->n_candidates[*row][*col] + p->n_row_candidates[*row] + p->n_col_candidates[*col] + p->n_sub_candidates[*row / 3][*col / 3];
-
-                    if (n_cand == score)
+                    uint32_t val = (1 << i);
+                    if (cell_candidates & val)
                     {
-                        uint32_t cell_candidates = p->grid[*row][*col].candidates;
-
-                        int n_val_cand = INT32_MAX;
-                        uint32_t val = 0;
-                        for (size_t i = 0; i < NUM_CANDIDATES; i++)
+                        int n_val_cand = p->val_n_candidates[i];
+                        if (score < min_score || (score == min_score && n_val_cand < p->val_n_candidates[best_candidate]))
                         {
-                            /* Value is candidate */
-                            if( (1 << i) & cell_candidates)
-                            {
-                                if(n_val_cand > p->val_n_candidates[i])
-                                {
-                                    n_val_cand = p->val_n_candidates[i];
-                                    val = (1 << i);
-                                }
-                            }
-                        }
-                        if(val)
-                        {
-                            return (Sudoku_BitValues_T)(val);
+                            min_score = score;
+                            best_candidate = (Sudoku_BitValues_T)(val);
+                            best_row = *row;
+                            best_col = *col;
                         }
                     }
                 }
             }
         }
 
-        return SUDOKU_BIT_INVALID_VALUE;
+        *row = best_row;
+        *col = best_col;
+
+        return best_candidate;
     }
 
     /**

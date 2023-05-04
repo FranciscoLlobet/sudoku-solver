@@ -33,7 +33,7 @@ TEST_CASE("Unsolvable Puzzles")
  *
  * Basically one solve() call per puzzle
  *
- * Max Level: 6
+ * Max Level: 5
  * Solves Per Puzzle: 1.00081
  *
  */
@@ -83,8 +83,8 @@ TEST_CASE("Puzzle1 Test. 1M Sudoku Puzzles")
 /**
  * @brief
  *
- * Solves Per Puzzle: 563.05
- * Max level: 22
+ * Solves Per Puzzle: 664.712
+ * Max level: 20
  */
 TEST_CASE("Puzzle3 Test.")
 {
