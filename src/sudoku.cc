@@ -10,6 +10,8 @@
  */
 #include "sudoku.hh"
 
+#include <sstream>
+
 /* Give access to private C-Library*/
 #include "_sudoku.h"
 
@@ -139,6 +141,23 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(const SudokuPuzzle &p)
 Sudoku_RC_T SudokuPuzzle::Print(void)
 {
     return (Sudoku_RC_T)Sudoku_PrintPuzzle(this->puzzle);
+}
+
+
+std::string SudokuPuzzle::GetPuzzle(void)
+{
+    std::stringstream puzzle_stream;
+
+    for (Sudoku_Row_Index_T  r = 0; r < NUM_ROWS; r++)
+    {
+        for (Sudoku_Column_Index_T  c = 0; c < NUM_COLS; c++)
+        {
+            auto val = Sudoku_GetValue(this->puzzle, r, c);
+            puzzle_stream << val;
+        }
+    }
+
+    return puzzle_stream.str();
 }
 
 SudokuPuzzle *SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val)

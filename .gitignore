@@ -57,6 +57,10 @@ CMakeFiles
 docs/html
 docs/latex
 
+data
+CMakeCache.txt
+Testing
+
 #vscode settings
 .vscode
 

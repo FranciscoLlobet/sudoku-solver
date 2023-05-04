@@ -100,6 +100,11 @@ TEST_CASE("Check Rows")
         CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, invalidTestPuzzles[0].c_str()));
         CHECK(SUDOKU_RC_ERROR == checkRows(&p));
     }
+    SUBCASE("Check Invalid but complete puzzle")
+    {
+        CHECK(SUDOKU_RC_SUCCESS == Sudoku_InitializeFromArray(&p, invalidTestPuzzles[3].c_str()));
+        CHECK(SUDOKU_RC_ERROR == checkRows(&p));
+    }
     SUBCASE("Check Valid Rows")
     {
         for (auto x : validTestPuzzles)

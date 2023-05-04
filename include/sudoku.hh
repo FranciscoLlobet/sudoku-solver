@@ -101,6 +101,14 @@ public:
      */
     Sudoku_RC_T Solve(void);
 
+
+    /**
+     * @brief Get the Puzzle object
+     * 
+     * @return std::string 
+     */
+    std::string GetPuzzle(void);
+
 private:
     /**
      * @brief Constructor, creates a new Sudoku puzzle object.
