@@ -770,7 +770,6 @@ extern "C"
                     {
                         uint32_t cell_candidates = p->grid[*row][*col].candidates;
 
-                        int idx_cand = 0;
                         int n_val_cand = INT32_MAX;
                         uint32_t val = 0;
                         for (size_t i = 0; i < NUM_CANDIDATES; i++)
