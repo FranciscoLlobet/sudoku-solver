@@ -50,14 +50,6 @@ public:
      */
     ~SudokuPuzzle(void);
 
-    // Manipulation functions
-
-    /**
-     * @brief Initializes an empty puzzle.
-     * @return Sudoku_RC_T The result code indicating success or failure.
-     */
-    Sudoku_RC_T InitializePuzzle(void);
-
     /**
      * @brief Initializes a puzzle using a string notation.
      * @param p The input puzzle in string notation.
@@ -66,26 +58,13 @@ public:
     Sudoku_RC_T InitializePuzzle(const std::string &p);
 
     /**
-     * @brief Initializes a puzzle using a SudokuPuzzle object reference.
-     * @param p The SudokuPuzzle object reference.
-     * @return Sudoku_RC_T The result code indicating success or failure.
-     */
-    Sudoku_RC_T InitializePuzzle(const SudokuPuzzle &p);
-
-    /**
-     * @brief Prints the Sudoku puzzle to the console.
-     * @return Sudoku_RC_T The result code indicating success or failure.
-     */
-    Sudoku_RC_T Print(void);
-
-    /**
      * @brief Sets a value in the puzzle.
      * @param row The row index.
      * @param col The column index.
      * @param val The value to set.
-     * @return SudokuPuzzle* A pointer to the modified puzzle object.
+     * @return Sudoku_RC_T The result code indicating success or failure.
      */
-    SudokuPuzzle *SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
+    Sudoku_RC_T SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val);
 
     /**
      * @brief Gets a value from the puzzle.
@@ -101,13 +80,17 @@ public:
      */
     Sudoku_RC_T Solve(void);
 
-
     /**
-     * @brief Get the Puzzle object as string
-     * 
-     * @return std::string 
+     *  @brief Get the Sudoku puzzle as a string.
+     * This method constructs a string representation of the current Sudoku puzzle.
+     * It iterates through each row and column, retrieves the value of each cell,
+     *
+     * and appends the value to the string. The resulting string has a length of 81 characters,
+     * representing the 9x9 grid of the Sudoku puzzle.
+     *
+     * @return std::string The Sudoku puzzle as a single string with no separators.
      */
-    std::string GetPuzzle(void);
+    std::string GetPuzzleAsString(void);
 
 private:
     /**
@@ -129,6 +112,19 @@ private:
      * @return Sudoku_RC_T The result code indicating success or failure.
      */
     Sudoku_RC_T InitializePuzzle(const SudokuPuzzle *p);
+
+    /**
+     * @brief Initializes an empty puzzle.
+     * @return Sudoku_RC_T The result code indicating success or failure.
+     */
+    Sudoku_RC_T InitializePuzzle(void);
+
+    /**
+     * @brief Initializes a puzzle using a SudokuPuzzle object reference.
+     * @param p The SudokuPuzzle object reference.
+     * @return Sudoku_RC_T The result code indicating success or failure.
+     */
+    Sudoku_RC_T InitializePuzzle(const SudokuPuzzle &p);
 
     /**
      * @brief Sets a value in the puzzle using a bitmask.

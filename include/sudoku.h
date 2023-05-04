@@ -129,7 +129,7 @@ extern "C"
      *
      * @param p A valid reference to a Sudoku puzzle object.
      * @return Sudoku_RC_T Returns SUDOKU_RC_SUCCESS if the initialization is successful,
-     *         SUDOKU_RC_ERROR if the provided puzzle pointer is NULL.
+     *         SUDOKU_RC_NULL_POINTER if the provided puzzle pointer is NULL.
      */
     Sudoku_RC_T Sudoku_InitializePuzzle(SudokuPuzzle_P p);
 
@@ -256,14 +256,6 @@ extern "C"
      * @return A Sudoku return code indicating the status of the puzzle after pruning (SUDOKU_RC_SUCCESS, SUDOKU_RC_SOLVED, or SUDOKU_RC_ERROR)
      */
     Sudoku_RC_T Sudoku_PrunePuzzle(SudokuPuzzle_P p);
-
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    /* ********************************************************************** */
-    int Sudoku_PrintPuzzle(SudokuPuzzle_P p);
 
 #ifdef __cplusplus
 }

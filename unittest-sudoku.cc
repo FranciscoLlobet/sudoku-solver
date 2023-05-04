@@ -12,7 +12,7 @@ TEST_CASE("Initialize Puzzle")
 
     SUBCASE("NULL Pointer test")
     {
-        CHECK(SUDOKU_RC_ERROR == Sudoku_InitializePuzzle((SudokuPuzzle_P)NULL));
+        CHECK(SUDOKU_RC_NULL_POINTER == Sudoku_InitializePuzzle((SudokuPuzzle_P)NULL));
     }
 
     SUBCASE("Initialize Puzzle")
@@ -86,7 +86,7 @@ TEST_CASE("Test Initialize from Array")
     struct SudokuPuzzle_S p;
     char test_array[] = "Test Array";
 
-    CHECK(SUDOKU_RC_ERROR == Sudoku_InitializeFromArray(NULL, test_array));
+    CHECK(SUDOKU_RC_NULL_POINTER == Sudoku_InitializeFromArray(NULL, test_array));
 
     CHECK(SUDOKU_RC_NULL_POINTER == Sudoku_InitializeFromArray(&p, NULL));
 }
@@ -417,8 +417,6 @@ TEST_CASE("Update puzzle candidates")
         CHECK(0 == generatePuzzleCellMasks(&p));
         CHECK(0 == updatePuzzleCandidates(&p));
         CHECK(SUDOKU_RC_SUCCESS == Sudoku_Check(&p));
-
-
     }
     SUBCASE("Check Hidden Singles")
     {
@@ -457,7 +455,7 @@ TEST_CASE("Remove Candidate Test")
     CHECK(SUDOKU_MASK_ALL == p.grid[0][0].candidates);
     CHECK(9 == countCandidatesInCell(&p, 0, 0));
 
-    removeCandidate(&p, 0, 0, SUDOKU_MASK_1);
+    (void)removeCandidate(&p, 0, 0, SUDOKU_MASK_1);
     
     CHECK((SUDOKU_MASK_ALL & ~SUDOKU_MASK_1) == p.grid[0][0].candidates);
     CHECK(8 == countCandidatesInCell(&p, 0, 0));
@@ -470,10 +468,10 @@ TEST_CASE("Test Candidate Count strategy")
 
     //generateCandidateMasks(&p);
 
-    countCandidatesInPuzzle(&p); // Count the candidates
-    countCandidateValues(&p);
-    countCandidatesInRows(&p);
-    countCandidatesInCols(&p);
+    (void)countCandidatesInPuzzle(&p); // Count the candidates
+    (void)countCandidateValues(&p);
+    (void)countCandidatesInRows(&p);
+    (void)countCandidatesInCols(&p);
 
     for (size_t idx = 0; idx < NUM_CANDIDATES; idx++)
     {
@@ -490,13 +488,10 @@ TEST_CASE("Test Candidate Count strategy")
             CHECK(9*3 == score);
         }
     }
-
-
-
 }
 
 
-TEST_CASE("Select candidate with lowest amount ")
+TEST_CASE("Select candidate with lowest amount")
 {
     struct SudokuPuzzle_S p;
     Sudoku_Row_Index_T row=0;
@@ -509,7 +504,7 @@ TEST_CASE("Select candidate with lowest amount ")
     CHECK((Sudoku_Column_Index_T)0 == col);
     CHECK(SUDOKU_BIT_VALUE_1 == val);
 
-    removeCandidate(&p, 4,4, SUDOKU_MASK_1);
+    (void)removeCandidate(&p, 4,4, SUDOKU_MASK_1);
     
     val = Sudoku_SelectCandidate(&p, &row, &col);
     

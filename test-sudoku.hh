@@ -1,14 +1,6 @@
 #ifndef TEST_SUDOKU_HH_INCLUDED
 #define TEST_SUDOKU_HH_INCLUDED
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #include <string>
 #include <array>
 #include <vector>

@@ -13,14 +13,11 @@ PYBIND11_MODULE(sudoku_solver, m) {
         .def(py::init<const std::string &>())
         .def(py::init<const SudokuPuzzle &>())
         .def("__copy__", &SudokuPuzzle::operator=)
-        .def("initialize_puzzle", py::overload_cast<>(&SudokuPuzzle::InitializePuzzle))
         .def("initialize_puzzle", py::overload_cast<const std::string &>(&SudokuPuzzle::InitializePuzzle))
-        .def("initialize_puzzle", py::overload_cast<const SudokuPuzzle &>(&SudokuPuzzle::InitializePuzzle))
-        .def("print", &SudokuPuzzle::Print)
         .def("set_value", py::overload_cast<Sudoku_Row_Index_T, Sudoku_Column_Index_T, Sudoku_Values_T>(&SudokuPuzzle::SetValue))
         .def("get_value", &SudokuPuzzle::GetValue)
         .def("solve", py::overload_cast<>(&SudokuPuzzle::Solve))
-        .def("get_puzzle", &SudokuPuzzle::GetPuzzle);
+        .def("get_puzzle", &SudokuPuzzle::GetPuzzleAsString);
 
     py::enum_<Sudoku_RC_T>(m, "SudokuRC")
         .value("SUDOKU_RC_ERROR", Sudoku_RC_E::SUDOKU_RC_ERROR)

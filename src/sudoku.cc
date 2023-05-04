@@ -138,13 +138,7 @@ Sudoku_RC_T SudokuPuzzle::InitializePuzzle(const SudokuPuzzle &p)
     return SUDOKU_RC_SUCCESS;
 }
 
-Sudoku_RC_T SudokuPuzzle::Print(void)
-{
-    return (Sudoku_RC_T)Sudoku_PrintPuzzle(this->puzzle);
-}
-
-
-std::string SudokuPuzzle::GetPuzzle(void)
+std::string SudokuPuzzle::GetPuzzleAsString(void)
 {
     std::stringstream puzzle_stream;
 
@@ -160,14 +154,9 @@ std::string SudokuPuzzle::GetPuzzle(void)
     return puzzle_stream.str();
 }
 
-SudokuPuzzle *SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val)
+Sudoku_RC_T SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_Values_T val)
 {
-    if (SUDOKU_RC_SUCCESS == Sudoku_SetValue(this->puzzle, row, col, val))
-    {
-        return this;
-    }
-
-    return NULL;
+    return Sudoku_SetValue(this->puzzle, row, col, val);
 }
 
 SudokuPuzzle *SudokuPuzzle::SetValue(Sudoku_Row_Index_T row, Sudoku_Column_Index_T col, Sudoku_BitValues_T val)

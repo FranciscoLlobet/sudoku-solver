@@ -13,7 +13,7 @@ extern "C"
         Sudoku_RC_T ret = SUDOKU_RC_SUCCESS;
         if (NULL == p)
         {
-            return SUDOKU_RC_ERROR; // Null pointer
+            return SUDOKU_RC_NULL_POINTER; // Null pointer
         }
 
         /* Clean the puzzle */
@@ -103,49 +103,26 @@ extern "C"
 
     static enum SudokuValues_E convertMaskToValue(uint32_t val)
     {
-        enum SudokuValues_E value = SUDOKU_NO_VALUE;
-
-        switch ((enum SudokuBitValues_E)(val))
+        if (val == 0)
         {
-        case SUDOKU_BIT_INVALID_VALUE:
-            value = SUDOKU_INVALID_VALUE;
-            break;
-        case SUDOKU_BIT_NO_VALUE:
-            value = SUDOKU_NO_VALUE;
-            break;
-        case SUDOKU_BIT_VALUE_1:
-            value = SUDOKU_VALUE_1;
-            break;
-        case SUDOKU_BIT_VALUE_2:
-            value = SUDOKU_VALUE_2;
-            break;
-        case SUDOKU_BIT_VALUE_3:
-            value = SUDOKU_VALUE_3;
-            break;
-        case SUDOKU_BIT_VALUE_4:
-            value = SUDOKU_VALUE_4;
-            break;
-        case SUDOKU_BIT_VALUE_5:
-            value = SUDOKU_VALUE_5;
-            break;
-        case SUDOKU_BIT_VALUE_6:
-            value = SUDOKU_VALUE_6;
-            break;
-        case SUDOKU_BIT_VALUE_7:
-            value = SUDOKU_VALUE_7;
-            break;
-        case SUDOKU_BIT_VALUE_8:
-            value = SUDOKU_VALUE_8;
-            break;
-        case SUDOKU_BIT_VALUE_9:
-            value = SUDOKU_VALUE_9;
-            break;
-        default:
-            value = SUDOKU_NOT_EXCLUSIVE_VALUE;
-            break;
+            return SUDOKU_NO_VALUE;
         }
 
-        return value;
+        uint32_t bit_position = 0;
+        while (!(val & 1))
+        {
+            val >>= 1;
+            bit_position++;
+        }
+
+        if (val == 1) // Only one bit is set
+        {
+            return (enum SudokuValues_E)(bit_position + 1);
+        }
+        else // Multiple bits are set
+        {
+            return SUDOKU_NOT_EXCLUSIVE_VALUE;
+        }
     }
 
     /* Get Value */
@@ -787,19 +764,30 @@ extern "C"
             {
                 for (*col = 0; *col < NUM_COLS; (*col)++)
                 {
-                    uint32_t score = 3*p->n_candidates[*row][*col] + p->n_row_candidates[*row] + p->n_col_candidates[*col] + p->n_sub_candidates[*row/3][*col/3];
+                    uint32_t score = 3 * p->n_candidates[*row][*col] + p->n_row_candidates[*row] + p->n_col_candidates[*col] + p->n_sub_candidates[*row / 3][*col / 3];
 
                     if (n_cand == score)
                     {
                         uint32_t cell_candidates = p->grid[*row][*col].candidates;
 
+                        int idx_cand = 0;
+                        int n_val_cand = INT32_MAX;
+                        uint32_t val = 0;
                         for (size_t i = 0; i < NUM_CANDIDATES; i++)
                         {
-                            uint32_t val = (1 << i);
-                            if (cell_candidates & val)
+                            /* Value is candidate */
+                            if( (1 << i) & cell_candidates)
                             {
-                                return (Sudoku_BitValues_T)(val);
+                                if(n_val_cand > p->val_n_candidates[i])
+                                {
+                                    n_val_cand = p->val_n_candidates[i];
+                                    val = (1 << i);
+                                }
                             }
+                        }
+                        if(val)
+                        {
+                            return (Sudoku_BitValues_T)(val);
                         }
                     }
                 }
@@ -872,34 +860,6 @@ extern "C"
             }
         }
         return rc;
-    }
-
-    int Sudoku_PrintPuzzle(SudokuPuzzle_P p)
-    {
-        int ret = 0;
-        if (NULL == p)
-            return -1;
-
-        int i;
-
-        for (i = 0; i < NUM_ROWS; i++)
-        {
-            if (!(i % 3))
-                printf("-------------------\n");
-            printf("|%d %d %d|%d %d %d|%d %d %d|\n",
-                   Sudoku_GetValue(p, i, 0),
-                   Sudoku_GetValue(p, i, 1),
-                   Sudoku_GetValue(p, i, 2),
-                   Sudoku_GetValue(p, i, 3),
-                   Sudoku_GetValue(p, i, 4),
-                   Sudoku_GetValue(p, i, 5),
-                   Sudoku_GetValue(p, i, 6),
-                   Sudoku_GetValue(p, i, 7),
-                   Sudoku_GetValue(p, i, 8));
-        }
-        printf("-------------------\n");
-
-        return ret;
     }
 
 #ifdef __cplusplus
