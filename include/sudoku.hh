@@ -103,7 +103,7 @@ public:
 
 
     /**
-     * @brief Get the Puzzle object
+     * @brief Get the Puzzle object as string
      * 
      * @return std::string 
      */

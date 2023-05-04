@@ -56,6 +56,34 @@ This command will compile the `main.cc` and `sudoku.cc` files, including the hea
 
 ## Public API Method Reference
 
+```plantuml
+@startuml
+class SudokuPuzzle {
+  -puzzle: SudokuPuzzle_P
+
+  +operator=(other: const SudokuPuzzle&): SudokuPuzzle&
+  +SudokuPuzzle(): void
+  +SudokuPuzzle(p: const std::string&): void
+  +SudokuPuzzle(other: const SudokuPuzzle&): void
+  +~SudokuPuzzle(): void
+  +InitializePuzzle(): Sudoku_RC_T
+  +InitializePuzzle(p: const std::string&): Sudoku_RC_T
+  +InitializePuzzle(p: const SudokuPuzzle&): Sudoku_RC_T
+  +Print(): Sudoku_RC_T
+  +SetValue(row: Sudoku_Row_Index_T, col: Sudoku_Column_Index_T, val: Sudoku_Values_T): SudokuPuzzle*
+  +GetValue(row: Sudoku_Row_Index_T, col: Sudoku_Column_Index_T): Sudoku_Values_T
+  +Solve(): Sudoku_RC_T
+  +GetPuzzle(): std::string
+
+  -SudokuPuzzle(p: SudokuPuzzle_P): void
+  -InitializePuzzle(p: SudokuPuzzle_P): Sudoku_RC_T
+  -InitializePuzzle(p: const SudokuPuzzle*): Sudoku_RC_T
+  -SetValue(row: Sudoku_Row_Index_T, col: Sudoku_Column_Index_T, val: Sudoku_BitValues_T): SudokuPuzzle*
+  -Solve(level: unsigned int): Sudoku_RC_T
+}
+
+@enduml
+```
 Here is an overview of the public methods provided by the `SudokuPuzzle` class:
 
 - `SudokuPuzzle()`: Default constructor that creates a blank Sudoku puzzle.
