@@ -265,10 +265,6 @@ extern "C"
     /* ********************************************************************** */
     int Sudoku_PrintPuzzle(SudokuPuzzle_P p);
 
-    SudokuPuzzle_P Sudoku_MallocPuzzle(void);
-    void Sudoku_FreePuzzle(SudokuPuzzle_P puzzle);
-    SudokuPuzzle_P Sudoku_CopyPuzzle(SudokuPuzzle_P destination, SudokuPuzzle_P source);
-
 #ifdef __cplusplus
 }
 #endif
