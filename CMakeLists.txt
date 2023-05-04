@@ -8,7 +8,6 @@ include(CTest)
 enable_testing()
 
 set(PYTHON_EXECUTABLE  /C/msys64/clang/bin/python3.exe)
-#et(PYTHON_LIBRARY /C/msys64/usr/clanf/libpython3.9.dll.a)
 
 find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG)
@@ -45,7 +44,7 @@ add_test(NAME unittest-sudoku COMMAND unittest-sudoku)
 add_test(NAME test-sudoku COMMAND test-sudoku)
 add_test(NAME benchmark-sudoku COMMAND benchmark-sudoku)
 add_test(NAME behave_tests
-         COMMAND ${Python_EXECUTABLE} -m behave
+         COMMAND ${Python_EXECUTABLE} -m behave -v
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/features)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
