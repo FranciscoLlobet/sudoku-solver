@@ -173,6 +173,11 @@ Sudoku_Values_T SudokuPuzzle::GetValue(Sudoku_Row_Index_T row, Sudoku_Column_Ind
     return (Sudoku_Values_T)Sudoku_GetValue(this->puzzle, row, col);
 }
 
+Sudoku_RC_T SudokuPuzzle::Check(void)
+{
+    return Sudoku_Check(this->puzzle);
+}
+
 Sudoku_RC_T SudokuPuzzle::Solve(void)
 {
     return Solve(0);

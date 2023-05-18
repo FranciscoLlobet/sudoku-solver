@@ -17,7 +17,8 @@ PYBIND11_MODULE(sudoku_solver, m) {
         .def("set_value", py::overload_cast<Sudoku_Row_Index_T, Sudoku_Column_Index_T, Sudoku_Values_T>(&SudokuPuzzle::SetValue))
         .def("get_value", &SudokuPuzzle::GetValue)
         .def("solve", py::overload_cast<>(&SudokuPuzzle::Solve))
-        .def("get_puzzle", &SudokuPuzzle::GetPuzzleAsString);
+        .def("get_puzzle", &SudokuPuzzle::GetPuzzleAsString)
+        .def("check", &SudokuPuzzle::Check);
 
     py::enum_<Sudoku_RC_T>(m, "SudokuRC")
         .value("SUDOKU_RC_ERROR", Sudoku_RC_E::SUDOKU_RC_ERROR)

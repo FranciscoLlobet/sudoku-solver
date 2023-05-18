@@ -56,7 +56,7 @@ TEST_CASE("Puzzle0 Test for pruning algorithm (100k)")
 }
 
 
-#if 0
+#if 1
 /**
  * @brief
  *
@@ -84,7 +84,7 @@ TEST_CASE("Puzzle1 Test. 1M Sudoku Puzzles")
  * @brief
  *
  * Solves Per Puzzle: 664.712
- * Max level: 20
+ * Max level: 20ma
  */
 TEST_CASE("Puzzle3 Test.")
 {

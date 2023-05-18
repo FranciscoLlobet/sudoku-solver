@@ -92,6 +92,9 @@ public:
      */
     std::string GetPuzzleAsString(void);
 
+
+    Sudoku_RC_T Check(void);
+
 private:
     /**
      * @brief Constructor, creates a new Sudoku puzzle object.

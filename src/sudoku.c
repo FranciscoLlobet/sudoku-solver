@@ -841,17 +841,13 @@ extern "C"
             {
                 for (unsigned int col = 0; col < NUM_COLS; col++)
                 {
-                    char char_value[2] = {0, 0};
+                    char char_value = sudoku_array[row * NUM_COLS + col];
 
-                    (void)strncpy_s(char_value, sizeof(char_value), sudoku_array + row * NUM_COLS + col, 1);
-
-                    if (isdigit(char_value[0]))
+                    // Checking if it is a valid digit
+                    if ((char_value >= '1') && (char_value <= '9'))
                     {
-                        int val = atoi(char_value);
-                        if (val != 0)
-                        {
-                            rc = Sudoku_SetValue(p, row, col, val);
-                        }
+                        int val = (int)char_value - (int)'0';
+                        rc = Sudoku_SetValue(p, row, col, val);
                     }
                 }
             }

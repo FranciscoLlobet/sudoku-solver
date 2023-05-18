@@ -6,8 +6,7 @@
     - Use a recursive pruning and backtracking algorithm to solve the puzzles
 
 2. **Constraints**
-    - Must be implemented in C++
-    - Must use the private C-Library `_sudoku.h`
+    - Must be implemented in C and C++
     - Must handle standard 9x9 Sudoku puzzles
 
 3. **Context and Scope**
