@@ -1,5 +1,7 @@
 # Sudoku Solver
 
+[![CMake](https://github.com/FranciscoLlobet/sudoku-solver/actions/workflows/cmake.yml/badge.svg)](https://github.com/FranciscoLlobet/sudoku-solver/actions/workflows/cmake.yml)
+
 A C++ library for solving Sudoku puzzles using a pruning and backtracking algorithm.
 
 ## Features
