@@ -41,7 +41,7 @@ add_test(NAME unittest-sudoku COMMAND unittest-sudoku)
 add_test(NAME test-sudoku COMMAND test-sudoku)
 add_test(NAME benchmark-sudoku COMMAND benchmark-sudoku)
 add_test(NAME behave_tests
-         COMMAND ${Python_EXECUTABLE} -m behave -v
+         COMMAND python3 -m behave -v
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/features)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
