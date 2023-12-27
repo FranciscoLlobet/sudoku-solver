@@ -31,10 +31,17 @@ jobs:
       with:
         python-version: '3.x'
         cache: 'pip'
+    
     - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel 
         pip install -r requirements.txt
+
+    - name: Install pybind11
+      run: sudo apt-get install -y python3-pybind11
+
+    - name: Install libbenchmark
+      run: sudo apt-get install -y libbenchmark-dev
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
