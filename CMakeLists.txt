@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 14)
 include(CTest)
 enable_testing()
 
-set(PYTHON_EXECUTABLE  /C/msys64/clang/bin/python3.exe)
+#set(PYTHON_EXECUTABLE  /C/msys64/clang/bin/python3.exe)
 
 find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG)
